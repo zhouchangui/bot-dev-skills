@@ -193,3 +193,20 @@ test('CLI install.mjs --dry-run writes nothing to disk and reports planned outpu
     fs.rmSync(repo, { recursive: true, force: true });
   }
 });
+
+test('rendered skills are self-contained with zero leaked gstack/mattpocock references', () => {
+  const result = compileSkills({
+    sourceDir: srcRoot,
+    hosts: ['dsh', 'agents', 'claude'],
+    claudeCopy: true,
+  });
+
+  const forbidden = /\b(gstack|mattpocock|grill-me|plan-eng-review|to-spec|to-tickets|codebase-design|document-release|TODOS\.md)\b/i;
+  for (const out of result.outputs) {
+    assert.equal(
+      forbidden.test(out.content),
+      false,
+      `Found leaked external skill reference in ${out.relPath}: ${out.content.match(forbidden)?.[0]}`,
+    );
+  }
+});

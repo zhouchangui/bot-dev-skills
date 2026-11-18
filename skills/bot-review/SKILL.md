@@ -2,7 +2,7 @@
 name: bot-review
 order: 5
 stage: 5. 多维合入评审
-description: "Unified pre-landing review: gstack Adversarial/Chaos pass + mattpocock dual-axis (Standards w/ Fowler smells + Spec compliance) + Ponytail bloat audit with Fix-First. Use for: review diff, code review, check pr, bot review."
+description: "Unified pre-landing review: Adversarial/Chaos pass + dual-axis (Standards w/ Fowler smells + Spec compliance) + Ponytail bloat audit with Fix-First. Use for: review diff, code review, check pr, bot review."
 ---
 
 # /bot-review — 对抗 + 双轴 + Ponytail 冗余融合评审
@@ -16,7 +16,9 @@ description: "Unified pre-landing review: gstack Adversarial/Chaos pass + mattpo
 1. 确定对比基准（`git diff <base>...HEAD` + 未提交改动）。
 2. 若有源 spec / ticket（{{TRACKER_HINT}}）与项目规范文档，同步读入作为对照依据。
 
-## 三维并行检查清单（不要合并混淆）
+## 三维独立检查清单（不合并打分）
+
+> 支持子代理并行的宿主可分派并行审查；单代理宿主按 **维度 A → B → C** 依次独立核查并分栏输出，严禁合并混淆。
 
 ### 维度 A：Adversarial & Production Failure（攻击者与混沌视角）
 - **边界与权限**：越权访问、未校验输入、路径穿越、注入、空值/超大负载、并发竞争与部分写入崩溃恢复。

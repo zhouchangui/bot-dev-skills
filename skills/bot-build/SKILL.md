@@ -22,8 +22,8 @@ description: "Implement vertical slices with seam-first red-green TDD and strict
 ## 编码循环（Vertical-Slice TDD）
 
 1. **Red before Green**：在 `/bot-plan` 商定的公共接缝（Seam）上先写一个失败测试，再写刚好让它变绿的最小实现。
-2. **拒绝三大反模式**：
-   - **耦合实现细节**：禁止 mock 内部协作者、测私有方法或绕过公开接口偷看内部状态。
+2. **拒绝三大反模式与 Mock 边界**：
+   - **耦合实现细节**：禁止 mock 内部协作者、测私有方法或绕过公开接口偷看内部状态；**Mock 仅限系统边界外 I/O（网络/时钟/第三方服务）**。
    - **自证断言（Tautological）**：禁止用被测逻辑同款公式算期望值，期望值必须来自独立真值（字面量/规格样例）。
    - **横向铺测试**：一次一个切片（1 个接缝 → 1 个红测 → 1 个最小实现），不提前为未来假设写空壳抽象。
 3. **写后冗余自检（Ponytail 红线）**：
