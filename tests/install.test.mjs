@@ -15,7 +15,7 @@ function makeTempDir(prefix = 'bot-skills-test-') {
   return fs.mkdtempSync(path.join(os.tmpdir(), prefix));
 }
 
-test('compileSkills builds all 8 bot-* skills + 1 router in pipeline order without hand-synced drift', () => {
+test('compileSkills builds all 9 bot-* skills + 1 router in pipeline order without hand-synced drift', () => {
   const result = compileSkills({
     sourceDir: srcRoot,
     hosts: ['dsh', 'agents', 'claude'],
@@ -32,11 +32,17 @@ test('compileSkills builds all 8 bot-* skills + 1 router in pipeline order witho
     },
   });
 
-  assert.equal(result.skills.length, 8);
+  assert.equal(result.skills.length, 9);
   assert.deepEqual(
     result.skills.map((s) => s.name),
-    ['bot-think', 'bot-plan', 'bot-build', 'bot-debug', 'bot-review', 'bot-verify', 'bot-ship', 'bot-retro'],
+    ['bot-auto', 'bot-think', 'bot-plan', 'bot-build', 'bot-debug', 'bot-review', 'bot-verify', 'bot-ship', 'bot-retro'],
   );
+
+  // Check host-specific stage path resolution inside bot-auto
+  const dshAuto = result.outputs.find((o) => o.relPath === '.dsh/bot-stages/bot-auto/SKILL.md');
+  const agentsAuto = result.outputs.find((o) => o.relPath === '.agents/skills/bot-auto/SKILL.md');
+  assert.match(dshAuto.content, /\.dsh\/bot-stages\/<skill>\/SKILL\.md/);
+  assert.match(agentsAuto.content, /\.agents\/skills\/<skill>\/SKILL\.md/);
 
   // Check DSH router references all 8 stages inside .dsh/bot-stages/
   const dshRouter = result.outputs.find((o) => o.relPath === '.dsh/skills/bot/SKILL.md');
@@ -221,9 +227,10 @@ test('installSkills works cleanly on a completely empty brand-new directory and 
       targetDir: blankRepo,
       hosts: ['dsh', 'agents', 'claude'],
     });
-    assert.equal(blankRes.outputs.length, 25);
-    assert.equal(blankRes.symlinks.length, 8);
+    assert.equal(blankRes.outputs.length, 28);
+    assert.equal(blankRes.symlinks.length, 9);
     assert.ok(fs.existsSync(path.join(blankRepo, '.dsh', 'skills', 'bot', 'SKILL.md')));
+    assert.ok(fs.existsSync(path.join(blankRepo, '.agents', 'skills', 'bot-auto', 'SKILL.md')));
     assert.ok(fs.existsSync(path.join(blankRepo, '.agents', 'skills', 'bot-think', 'SKILL.md')));
     assert.equal(fs.lstatSync(path.join(blankRepo, '.claude', 'skills', 'bot-think')).isSymbolicLink(), true);
 
