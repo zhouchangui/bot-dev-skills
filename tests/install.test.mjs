@@ -216,9 +216,11 @@ test('rendered skills are self-contained with zero leaked external skill referen
     );
   }
 
+  const agentsThink = result.outputs.find((o) => o.relPath === '.agents/skills/bot-think/SKILL.md');
   const agentsPlan = result.outputs.find((o) => o.relPath === '.agents/skills/bot-plan/SKILL.md');
   const agentsReview = result.outputs.find((o) => o.relPath === '.agents/skills/bot-review/SKILL.md');
   const agentsAuto = result.outputs.find((o) => o.relPath === '.agents/skills/bot-auto/SKILL.md');
+  assert.match(agentsThink.content, /DESIGN\.md/);
   assert.match(agentsPlan.content, /DESIGN\.md/);
   assert.match(agentsPlan.content, /交互五态/);
   assert.match(agentsReview.content, /维度 D：UI 与交互审计/);
