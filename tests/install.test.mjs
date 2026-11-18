@@ -108,17 +108,17 @@ test('safetyGuard blocks writes into protected system DSH/tianji paths including
   }
 });
 
-test('installSkills preserves existing non-bot skills (e.g. knock-redeem), manages .claude/skills symlinks, and updates .git/info/exclude', () => {
+test('installSkills preserves existing non-bot skills, manages .claude/skills symlinks, and updates .git/info/exclude', () => {
   const repo = makeTempDir('bot-repo-');
   try {
-    // Fake git repo with .git/info and existing knock-redeem + real .claude/skills dir
+    // Fake git repo with .git/info and an existing local custom skill + real .claude/skills dir
     fs.mkdirSync(path.join(repo, '.git', 'info'), { recursive: true });
-    fs.mkdirSync(path.join(repo, '.agents', 'skills', 'knock-redeem'), { recursive: true });
-    fs.writeFileSync(path.join(repo, '.agents', 'skills', 'knock-redeem', 'SKILL.md'), '# keep me\n');
+    fs.mkdirSync(path.join(repo, '.agents', 'skills', 'custom-local-skill'), { recursive: true });
+    fs.writeFileSync(path.join(repo, '.agents', 'skills', 'custom-local-skill', 'SKILL.md'), '# keep me\n');
     fs.mkdirSync(path.join(repo, '.agents', 'skills', 'bot-stale-old'), { recursive: true });
     fs.writeFileSync(path.join(repo, '.agents', 'skills', 'bot-stale-old', 'SKILL.md'), '# stale\n');
     fs.mkdirSync(path.join(repo, '.claude', 'skills'), { recursive: true });
-    fs.symlinkSync('../../.agents/skills/knock-redeem', path.join(repo, '.claude', 'skills', 'knock-redeem'));
+    fs.symlinkSync('../../.agents/skills/custom-local-skill', path.join(repo, '.claude', 'skills', 'custom-local-skill'));
 
     fs.writeFileSync(
       path.join(repo, '.bot-skills.json'),
@@ -137,7 +137,7 @@ test('installSkills preserves existing non-bot skills (e.g. knock-redeem), manag
     });
 
     assert.equal(summary.dryRun, false);
-    assert.ok(fs.existsSync(path.join(repo, '.agents', 'skills', 'knock-redeem', 'SKILL.md')));
+    assert.ok(fs.existsSync(path.join(repo, '.agents', 'skills', 'custom-local-skill', 'SKILL.md')));
     assert.equal(fs.existsSync(path.join(repo, '.agents', 'skills', 'bot-stale-old')), false);
     assert.ok(fs.existsSync(path.join(repo, '.dsh', 'skills', 'bot', 'SKILL.md')));
     assert.ok(fs.existsSync(path.join(repo, '.dsh', 'bot-stages', 'bot-build', 'SKILL.md')));
@@ -146,7 +146,7 @@ test('installSkills preserves existing non-bot skills (e.g. knock-redeem), manag
     const claudeLink = path.join(repo, '.claude', 'skills', 'bot-build');
     assert.equal(fs.lstatSync(claudeLink).isSymbolicLink(), true);
     assert.equal(fs.readlinkSync(claudeLink), '../../.agents/skills/bot-build');
-    assert.equal(fs.readlinkSync(path.join(repo, '.claude', 'skills', 'knock-redeem')), '../../.agents/skills/knock-redeem');
+    assert.equal(fs.readlinkSync(path.join(repo, '.claude', 'skills', 'custom-local-skill')), '../../.agents/skills/custom-local-skill');
 
     // .git/info/exclude must ignore .dsh/bot-stages/
     const excludeText = fs.readFileSync(path.join(repo, '.git', 'info', 'exclude'), 'utf8');
