@@ -207,7 +207,7 @@ test('rendered skills are self-contained with zero leaked external skill referen
     claudeCopy: true,
   });
 
-  const forbidden = /\b(gstack|mattpocock|ponytail|grill-me|plan-eng-review|plan-design-review|design-review|to-spec|to-tickets|codebase-design|document-release|diagnosing-bugs|office-hours|TODOS\.md)\b/i;
+  const forbidden = /\b(gstack|mattpocock|ponytail|grill-me|plan-eng-review|plan-design-review|design-review|design-consultation|to-spec|to-tickets|codebase-design|document-release|diagnosing-bugs|office-hours|TODOS\.md)\b/i;
   for (const out of result.outputs) {
     assert.equal(
       forbidden.test(out.content),
@@ -221,9 +221,11 @@ test('rendered skills are self-contained with zero leaked external skill referen
   const agentsReview = result.outputs.find((o) => o.relPath === '.agents/skills/bot-review/SKILL.md');
   const agentsAuto = result.outputs.find((o) => o.relPath === '.agents/skills/bot-auto/SKILL.md');
   assert.match(agentsThink.content, /DESIGN\.md/);
+  assert.match(agentsThink.content, /第一眼记忆点/);
   assert.match(agentsPlan.content, /DESIGN\.md/);
   assert.match(agentsPlan.content, /交互五态/);
   assert.match(agentsReview.content, /维度 D：UI 与交互审计/);
+  assert.match(agentsReview.content, /卡片套卡片/);
   assert.match(agentsAuto.content, /UI 影响面强制激活/);
 });
 
