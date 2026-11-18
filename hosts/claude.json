@@ -1,0 +1,9 @@
+{
+  "name": "claude",
+  "displayName": "Claude Code (.claude/skills)",
+  "outputDir": ".claude/skills",
+  "symlinkFrom": ".agents/skills",
+  "routerMode": "per-skill",
+  "descriptionLimit": 1024,
+  "toolNotes": "对应 Claude Code 工具集：`Read`/`Edit`/`Write`、`Bash`、`Grep`/`Glob`、`Agent`、`AskUserQuestion`。"
+}

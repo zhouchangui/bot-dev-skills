@@ -1,0 +1,9 @@
+{
+  "name": "agents",
+  "displayName": "Antigravity & Codex (.agents/skills)",
+  "outputDir": ".agents/skills",
+  "routerMode": "per-skill",
+  "descriptionLimit": 1024,
+  "generateOpenAiYaml": true,
+  "toolNotes": "采用宿主中立表达：读取/编辑文件、执行终端命令、代码库检索、向用户批量提问（优先用结构化提问工具，无工具时用清晰编号列表等待用户回复）。"
+}

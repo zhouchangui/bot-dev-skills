@@ -1,0 +1,9 @@
+{
+  "name": "dsh",
+  "displayName": "DeepSeek Harness (DSH)",
+  "routerDir": ".dsh/skills/bot",
+  "stagesDir": ".dsh/bot-stages",
+  "routerMode": "single-router",
+  "descriptionLimit": 1024,
+  "toolNotes": "使用当前会话提供的文件读写、命令执行、搜索与多选项确认工具；载入某个阶段技能时直接读取其对应的 `.dsh/bot-stages/<skill>/SKILL.md`。"
+}
