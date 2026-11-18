@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Unified low-friction coding pipeline combining gstack, mattpocock/skills, and Ponytail minimalism across DSH, Antigravity, Codex, and Claude Code.",
+  "description": "Self-contained, low-friction 8+1 coding pipeline for DSH, Antigravity, Codex, and Claude Code.",
+  "bin": {
+    "bot-skills": "scripts/install.mjs"
+  },
   "engines": {
     "node": ">=22.19.0"
   },

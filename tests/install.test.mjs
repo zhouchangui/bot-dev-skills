@@ -194,19 +194,47 @@ test('CLI install.mjs --dry-run writes nothing to disk and reports planned outpu
   }
 });
 
-test('rendered skills are self-contained with zero leaked gstack/mattpocock references', () => {
+test('rendered skills are self-contained with zero leaked external skill references', () => {
   const result = compileSkills({
     sourceDir: srcRoot,
     hosts: ['dsh', 'agents', 'claude'],
     claudeCopy: true,
   });
 
-  const forbidden = /\b(gstack|mattpocock|grill-me|plan-eng-review|to-spec|to-tickets|codebase-design|document-release|TODOS\.md)\b/i;
+  const forbidden = /\b(gstack|mattpocock|ponytail|grill-me|plan-eng-review|to-spec|to-tickets|codebase-design|document-release|diagnosing-bugs|office-hours|TODOS\.md)\b/i;
   for (const out of result.outputs) {
     assert.equal(
       forbidden.test(out.content),
       false,
       `Found leaked external skill reference in ${out.relPath}: ${out.content.match(forbidden)?.[0]}`,
     );
+  }
+});
+
+test('installSkills works cleanly on a completely empty brand-new directory and git worktree', () => {
+  const blankRepo = makeTempDir('bot-blank-repo-');
+  const worktreeRepo = makeTempDir('bot-worktree-repo-');
+  const realGitDir = makeTempDir('bot-real-gitdir-');
+  try {
+    const blankRes = installSkills({
+      sourceDir: srcRoot,
+      targetDir: blankRepo,
+      hosts: ['dsh', 'agents', 'claude'],
+    });
+    assert.equal(blankRes.outputs.length, 25);
+    assert.equal(blankRes.symlinks.length, 8);
+    assert.ok(fs.existsSync(path.join(blankRepo, '.dsh', 'skills', 'bot', 'SKILL.md')));
+    assert.ok(fs.existsSync(path.join(blankRepo, '.agents', 'skills', 'bot-think', 'SKILL.md')));
+    assert.equal(fs.lstatSync(path.join(blankRepo, '.claude', 'skills', 'bot-think')).isSymbolicLink(), true);
+
+    fs.mkdirSync(path.join(realGitDir, 'info'), { recursive: true });
+    fs.writeFileSync(path.join(worktreeRepo, '.git'), `gitdir: ${realGitDir}\n`);
+    installSkills({ sourceDir: srcRoot, targetDir: worktreeRepo, hosts: ['dsh'] });
+    const excludeText = fs.readFileSync(path.join(realGitDir, 'info', 'exclude'), 'utf8');
+    assert.match(excludeText, /\.dsh\/bot-stages\//);
+  } finally {
+    fs.rmSync(blankRepo, { recursive: true, force: true });
+    fs.rmSync(worktreeRepo, { recursive: true, force: true });
+    fs.rmSync(realGitDir, { recursive: true, force: true });
   }
 });

@@ -7,14 +7,14 @@ description: "Verification gate before shipping: run project check/test/smoke co
 
 # /bot-verify — 确定性验证与安全门禁
 
-目标：用**真实命令输出与实测证据**证明改动可安全交付；没有经过最新代码实跑的检查，一律不得宣称通过。
+目标：用**真实命令输出与实测证据**证明改动可安全交付；没有在最后一次代码修改后实跑的检查，一律不得宣称通过。
 
 {{PREAMBLE}}
 
 ## 执行清单
 
 1. **项目级检查**：
-   - **全仓基线检查（必跑）**：执行类型检查与测试套件（{{CHECK_COMMAND_HINT}}）。
+   - **全仓基线检查（必跑）**：执行类型检查与测试套件（{{CHECK_COMMAND_HINT}}）；若未显式配置，自动识别 `package.json` / `pyproject.toml` / `Cargo.toml` / `go.mod` / `Makefile` 中的 check/test 命令实跑，均无则如实汇报 `未配置检查命令`。
    - **按变更影响面触发端到端验收**：若改动涉及客户端/服务端/运行态/构建脚本，执行 {{VERIFY_COMMAND_HINT}}；纯文档或无关子模块改动可跳过并在证据中写明原因，不拖慢心流。
 2. **变更敏感面安全自检（若涉及鉴权/支付/网络/文件/外部输入）**：
    - **密钥与敏感信息**：无硬编码秘钥，且密钥/Token 不进日志、报错或 URL 查询参数；
