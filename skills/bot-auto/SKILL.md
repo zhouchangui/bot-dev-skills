@@ -16,7 +16,7 @@ description: "End-to-end automated pipeline driver: orchestrates bot-think → b
 先用 10 秒阅读相关文件并判断任务规模（不问用户，直接定级并按路径推进）：
 
 * **S 级（小改 / 明确修复 / 单模块调参）**：
-  - 跳过 `bot-think` 与 `bot-plan`（或在极简定位接缝后直接开工）。
+  - 纯代码/配置小改可跳过 `bot-think` 与 `bot-plan`；**若涉及界面/样式/交互改动，开工前必须先核对 `DESIGN.md`/样式 token 与交互五态**。
   - 流程：`/bot-build`（或 `/bot-debug`）→ `/bot-review` → `/bot-verify` → `/bot-ship`。
 * **M 级（标准新功能 / 跨文件改动 / 重构）**：
   - 完整流程：`/bot-think` → `/bot-plan` → `/bot-build` → `/bot-review` → `/bot-verify` → `/bot-ship`。
@@ -26,12 +26,13 @@ description: "End-to-end automated pipeline driver: orchestrates bot-think → b
 ## 编排执行铁律
 
 1. **按需读入阶段规范**：每次进入下一阶段时，用文件读取工具直接读取对应阶段文件（`{{STAGE_PATH_PATTERN}}`），严格执行其门禁与检查项，不要凭记忆跳步。
-2. **不重复提问**：`/bot-think` 已经向用户确认过的问题与方案，自动带入 `/bot-plan` 与 `/bot-build`，严禁重复弹窗。
-3. **只守三道硬闸门**：
+2. **UI 影响面强制激活**：只要需求涉及页面、组件、样式或前端交互，**务必激活** `/bot-plan` 的 UI 与五态检查、`/bot-build` 的状态展示分离与 token 复用、`/bot-review` 的维度 D（UI 审计）及 `/bot-verify` 的真实界面验收；纯后端/CLI 任务则自动跳过 UI 检查，零额外开销。
+3. **不重复提问**：`/bot-think` 已经向用户确认过的问题与方案，自动带入 `/bot-plan` 与 `/bot-build`，严禁重复弹窗。
+4. **只守三道硬闸门**：
    - **闸门 #1（重大决策）**：仅在 `/bot-think` 批量澄清+方案拍板时、或后续阶段发现未预见的跨模块/Schema/范围变更时停下来问。
    - **闸门 #2（建分支/worktree）**：在 `/bot-build` 动代码前，如需建分支或 worktree 必须先问确认；若用户明确要求直接在当前分支改则直接开工。
    - **闸门 #3（发布与合并）**：所有代码、`/bot-review`（Fix-First）与最终 `/bot-verify` 全绿收口后，在 `/bot-ship` 执行 `git push` / 创建或合并 PR / 部署前停下来展示证据与清单等用户拍板。
-4. **Fix-First 自动闭环**：`/bot-review` 修完确定性小问题后，**自动触发一次新鲜的 `/bot-verify`**，全绿后再交 `/bot-ship` 过闸门 #3，无需用户手动来回点命令。
-5. **复盘轻量收尾**：交付完成后，仅在本次确实暴露出“值得沉淀成 linter/hook/测试的重复坑”时，附带一句提示是否执行 `/bot-retro`；顺畅无坑时不打扰。
+5. **Fix-First 自动闭环**：`/bot-review` 修完确定性小问题后，**自动触发一次新鲜的 `/bot-verify`**，全绿后再交 `/bot-ship` 过闸门 #3，无需用户手动来回点命令。
+6. **复盘轻量收尾**：交付完成后，仅在本次确实暴露出“值得沉淀成 linter/hook/测试的重复坑”时，附带一句提示是否执行 `/bot-retro`；顺畅无坑时不打扰。
 
 {{STAGE_RULES}}

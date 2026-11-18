@@ -15,7 +15,7 @@ description: "Verification gate before shipping: run project check/test/smoke co
 
 1. **项目级检查**：
    - **全仓基线检查（必跑）**：执行类型检查与测试套件（{{CHECK_COMMAND_HINT}}）；若未显式配置，自动识别 `package.json` / `pyproject.toml` / `Cargo.toml` / `go.mod` / `Makefile` 中的 check/test 命令实跑，均无则如实汇报 `未配置检查命令`。
-   - **按变更影响面触发端到端验收**：若改动涉及客户端/服务端/运行态/构建脚本，执行 {{VERIFY_COMMAND_HINT}}；纯文档或无关子模块改动可跳过并在证据中写明原因，不拖慢心流。
+   - **按变更影响面触发端到端验收**：若改动涉及前端界面 / 客户端 / 服务端 / 运行态 / 构建脚本，执行 {{VERIFY_COMMAND_HINT}}（涉及 UI 时按项目允许的真实运行入口核查视觉布局与交互五态，严禁越过项目环境禁令）；纯文档或无关子模块改动可跳过并在证据中写明原因，不拖慢心流。
 2. **变更敏感面安全自检（若涉及鉴权/支付/网络/文件/外部输入）**：
    - **密钥与敏感信息**：无硬编码秘钥，且密钥/Token 不进日志、报错或 URL 查询参数；
    - **认证与鉴权边界**：Fail-Closed，默认拒绝而非放行，服务端二次校验归属权；
