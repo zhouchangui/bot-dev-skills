@@ -30,7 +30,8 @@ description: "Implement vertical slices with strict minimalism (reuse ladder, Ru
    - 一旦看清公共接缝，清理多余试验代码，按路径 1 补上接缝测试后再落正式实现。
 3. **前端 UI 视觉 / 静态装配（状态与展示分离）**：
    - 把状态流转、筛选、派生计算抽成纯函数走路径 1 的接缝单测；
-   - 布局、样式与交互组件直接实现，**严格复用 `DESIGN.md` / 既有样式 token** 并落实 `/bot-plan` 锁定的空态/加载/错态/溢出五态与键盘可达性，靠 `/bot-verify` 中的真实运行/本地应用验收，**不写脆弱的 DOM/CSS 快照测试**。
+   - 实现布局、样式与交互前**先读 `{{UI_CRAFT_PATH}}`**：严格复用 `DESIGN.md` / 既有样式 token，落实五态、真实文案/真实产品画面、微排版（`-0.02em`、行宽控制、`tabular-nums`）、同心圆角、tinted grays（彩底禁灰字）与浏览面定制（`::selection` / 焦点环 / 滚动条）；
+   - 交互动效统一采用 `ease-out`（`cubic-bezier(0.23,1,0.32,1)`，`scale(0.97)` 按下回弹、触发点 `transform-origin`、只动画 `transform`/`opacity`、仅 `fixed`/`sticky` 层用 `backdrop-blur`、每容器单次入场），**不写脆弱的 DOM/CSS 快照测试**，界面靠 `/bot-verify` 实跑验收。
 
 ## 写后收尾
 

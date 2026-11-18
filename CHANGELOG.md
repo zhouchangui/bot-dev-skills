@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - **新增 `/bot-auto` 全流程自动编排入口（升级为 `9 + 1` 体系）**：按任务规模（S/M/L）自动串行/跳过各阶段，只在三道硬闸门停顿确认，并按宿主注入精确阶段路径（`{{STAGE_PATH_PATTERN}}`）。
 - **增强 `/bot-build` 三路径实现分流**：区分“规则/接口/脚本（接缝 TDD）”、“陌生探索 Spike（先探后锁）”与“前端 UI 视觉（状态与展示分离）”，兼顾质量与开发心流。
 - **内嵌 UI 与交互设计检查（零额外命令、仅在涉及界面时强制激活）**：在 `/bot-think`、`/bot-plan`、`/bot-build`、`/bot-review`（维度 D）、`/bot-verify` 与 `/bot-auto` 中加入 `DESIGN.md` 首次建档/反推（第一眼记忆点、场景明暗、角色字体、可选静态 HTML 预览板）、五态补齐（空/加载/错/溢出/首用）、反套路视觉红线（禁卡片套卡片/三栏图标网格等）及响应式/可达性检查。
+- **新增按需加载设计工艺参考（`skills/ui-craft.md` → 各宿主 `bot-auto/references/ui-craft.md`）**：提炼反 AI 默认皮肤清单、官网 Persuade 首屏三要素与真实材质纪律、中文/英文微排版（`-0.02em`、`65ch`、`tabular-nums`、同心圆角、tinted gray 与彩底禁灰字）、确定性物理动效（`cubic-bezier(0.23,1,0.32,1)`、`:active scale(0.97)`、触发点 `transform-origin`、每容器单次入场、高频零延迟、GPU/fixed-only blur）以及 Skeleton Test + `提纯/降噪/强化/打磨` 精准调校动词，并与 `{{UI_CRAFT_PATH}}` 占位符联动注入 `bot-think`/`bot-plan`/`bot-build`/`bot-review`/`bot-auto`（纯后端任务零读取开销）。
 
 ## [0.1.0] - 2026-11-18
 

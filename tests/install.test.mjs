@@ -207,7 +207,7 @@ test('rendered skills are self-contained with zero leaked external skill referen
     claudeCopy: true,
   });
 
-  const forbidden = /\b(gstack|mattpocock|ponytail|grill-me|plan-eng-review|plan-design-review|design-review|design-consultation|to-spec|to-tickets|codebase-design|document-release|diagnosing-bugs|office-hours|TODOS\.md)\b/i;
+  const forbidden = /\b(gstack|mattpocock|ponytail|grill-me|plan-eng-review|plan-design-review|design-review|design-consultation|to-spec|to-tickets|codebase-design|document-release|diagnosing-bugs|office-hours|TODOS\.md|taste-skill|impeccable|emil-design-eng|frontend-design|ui-ux-pro-max)\b/i;
   for (const out of result.outputs) {
     assert.equal(
       forbidden.test(out.content),
@@ -218,14 +218,30 @@ test('rendered skills are self-contained with zero leaked external skill referen
 
   const agentsThink = result.outputs.find((o) => o.relPath === '.agents/skills/bot-think/SKILL.md');
   const agentsPlan = result.outputs.find((o) => o.relPath === '.agents/skills/bot-plan/SKILL.md');
+  const agentsBuild = result.outputs.find((o) => o.relPath === '.agents/skills/bot-build/SKILL.md');
   const agentsReview = result.outputs.find((o) => o.relPath === '.agents/skills/bot-review/SKILL.md');
   const agentsAuto = result.outputs.find((o) => o.relPath === '.agents/skills/bot-auto/SKILL.md');
+  const dshBuild = result.outputs.find((o) => o.relPath === '.dsh/bot-stages/bot-build/SKILL.md');
+  const claudeReview = result.outputs.find((o) => o.relPath === '.claude/skills/bot-review/SKILL.md');
+  const agentsUiCraft = result.outputs.find((o) => o.relPath === '.agents/skills/bot-auto/references/ui-craft.md');
+  const dshUiCraft = result.outputs.find((o) => o.relPath === '.dsh/bot-stages/bot-auto/references/ui-craft.md');
+  const claudeUiCraft = result.outputs.find((o) => o.relPath === '.claude/skills/bot-auto/references/ui-craft.md');
+
+  assert.ok(agentsUiCraft && dshUiCraft && claudeUiCraft);
+  assert.match(agentsUiCraft.content, /Skeleton Test/);
+  assert.match(agentsUiCraft.content, /cubic-bezier\(0\.23, 1, 0\.32, 1\)/);
+  assert.match(agentsThink.content, /\.agents\/skills\/bot-auto\/references\/ui-craft\.md/);
   assert.match(agentsThink.content, /DESIGN\.md/);
   assert.match(agentsThink.content, /第一眼记忆点/);
+  assert.match(agentsPlan.content, /\.agents\/skills\/bot-auto\/references\/ui-craft\.md/);
   assert.match(agentsPlan.content, /DESIGN\.md/);
   assert.match(agentsPlan.content, /交互五态/);
+  assert.match(agentsBuild.content, /\.agents\/skills\/bot-auto\/references\/ui-craft\.md/);
+  assert.match(dshBuild.content, /\.dsh\/bot-stages\/bot-auto\/references\/ui-craft\.md/);
+  assert.match(claudeReview.content, /\.claude\/skills\/bot-auto\/references\/ui-craft\.md/);
   assert.match(agentsReview.content, /维度 D：UI 与交互审计/);
   assert.match(agentsReview.content, /卡片套卡片/);
+  assert.match(agentsReview.content, /独特性判词/);
   assert.match(agentsAuto.content, /UI 影响面强制激活/);
 });
 
@@ -239,10 +255,13 @@ test('installSkills works cleanly on a completely empty brand-new directory and 
       targetDir: blankRepo,
       hosts: ['dsh', 'agents', 'claude'],
     });
-    assert.equal(blankRes.outputs.length, 28);
+    assert.equal(blankRes.outputs.length, 30);
     assert.equal(blankRes.symlinks.length, 9);
     assert.ok(fs.existsSync(path.join(blankRepo, '.dsh', 'skills', 'bot', 'SKILL.md')));
+    assert.ok(fs.existsSync(path.join(blankRepo, '.dsh', 'bot-stages', 'bot-auto', 'references', 'ui-craft.md')));
     assert.ok(fs.existsSync(path.join(blankRepo, '.agents', 'skills', 'bot-auto', 'SKILL.md')));
+    assert.ok(fs.existsSync(path.join(blankRepo, '.agents', 'skills', 'bot-auto', 'references', 'ui-craft.md')));
+    assert.ok(fs.existsSync(path.join(blankRepo, '.claude', 'skills', 'bot-auto', 'references', 'ui-craft.md')));
     assert.ok(fs.existsSync(path.join(blankRepo, '.agents', 'skills', 'bot-think', 'SKILL.md')));
     assert.equal(fs.lstatSync(path.join(blankRepo, '.claude', 'skills', 'bot-think')).isSymbolicLink(), true);
 

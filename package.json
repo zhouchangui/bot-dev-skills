@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Self-contained, low-friction 8+1 coding pipeline for DSH, Antigravity, Codex, and Claude Code.",
+  "description": "Self-contained, low-friction 9+1 coding pipeline for DSH, Antigravity, Codex, and Claude Code.",
   "bin": {
     "bot-skills": "scripts/install.mjs"
   },

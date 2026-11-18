@@ -26,7 +26,7 @@ description: "End-to-end automated pipeline driver: orchestrates bot-think → b
 ## 编排执行铁律
 
 1. **按需读入阶段规范**：每次进入下一阶段时，用文件读取工具直接读取对应阶段文件（`{{STAGE_PATH_PATTERN}}`），严格执行其门禁与检查项，不要凭记忆跳步。
-2. **UI 影响面强制激活**：只要需求涉及页面、组件、样式或前端交互，**务必激活** `/bot-plan` 的 UI 与五态检查、`/bot-build` 的状态展示分离与 token 复用、`/bot-review` 的维度 D（UI 审计）及 `/bot-verify` 的真实界面验收；纯后端/CLI 任务则自动跳过 UI 检查，零额外开销。
+2. **UI 影响面强制激活**：只要需求涉及页面、官网、组件、样式或前端交互，**务必按需读取 `{{UI_CRAFT_PATH}}` 并激活** `/bot-plan` 的 UI 与五态检查、`/bot-build` 的状态展示分离与微工艺落地、`/bot-review` 的维度 D（独特性判词与 UI 审计）及 `/bot-verify` 的真实界面验收；纯后端/CLI 任务则自动跳过 UI 检查，零额外开销。
 3. **不重复提问**：`/bot-think` 已经向用户确认过的问题与方案，自动带入 `/bot-plan` 与 `/bot-build`，严禁重复弹窗。
 4. **只守三道硬闸门**：
    - **闸门 #1（重大决策）**：仅在 `/bot-think` 批量澄清+方案拍板时、或后续阶段发现未预见的跨模块/Schema/范围变更时停下来问。
