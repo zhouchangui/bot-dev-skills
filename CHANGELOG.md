@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added / Changed
+- **优化批量澄清交互分流（`skills/preamble.md`、`skills/bot-think/SKILL.md` 与各宿主 `toolNotes`）**：明确“业务问清楚优先”，≤ 4 个独立选择题使用宿主交互式多选工具，超 4 题或以开放性业务问题为主时切换为正文分组编号清单（附默认推荐）并等待回复，避免受单次 4 题上限截断业务澄清。
 - **全局家目录安装路径适配与跨目录软链防误写（`lib/compiler.mjs`）**：当 `--target` 解析为用户家目录（`~`）时，自动为阶段路径与 `ui-craft.md` 参考路径添加 `~/` 前缀（同时继续硬拦截 `~/.dsh`）；并在写入前拦截经由软链逃逸出 `targetDir` 的输出路径，防止单仓安装误覆写全局 `~/.agents/skills`。
 - **新增 `/bot-auto` 全流程自动编排入口（升级为 `9 + 1` 体系）**：按任务规模（S/M/L）自动串行/跳过各阶段，只在三道硬闸门停顿确认，并按宿主注入精确阶段路径（`{{STAGE_PATH_PATTERN}}`）。
 - **增强 `/bot-build` 三路径实现分流**：区分“规则/接口/脚本（接缝 TDD）”、“陌生探索 Spike（先探后锁）”与“前端 UI 视觉（状态与展示分离）”，兼顾质量与开发心流。

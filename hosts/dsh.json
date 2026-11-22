@@ -5,5 +5,5 @@
   "stagesDir": ".dsh/bot-stages",
   "routerMode": "single-router",
   "descriptionLimit": 1024,
-  "toolNotes": "使用当前会话提供的文件读写、命令执行、搜索与多选项确认工具；载入某个阶段技能时，请用文件读取工具按路径直接读取对应的 `.dsh/bot-stages/<skill>/SKILL.md`（不要用受 gitignore 限制的搜索/glob 工具查找该目录）。"
+  "toolNotes": "使用当前会话提供的文件读写、命令执行、搜索与多选项确认工具（多选项确认工具仅用于 ≤4 个独立选择题；超 4 题或含开放性业务问题时改用正文分组编号清单等待用户回复，业务问清楚优先）；载入某个阶段技能时，请用文件读取工具按路径直接读取对应的 `.dsh/bot-stages/<skill>/SKILL.md`（不要用受 gitignore 限制的搜索/glob 工具查找该目录）。"
 }

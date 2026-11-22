@@ -227,12 +227,22 @@ test('rendered skills are self-contained with zero leaked external skill referen
   const dshUiCraft = result.outputs.find((o) => o.relPath === '.dsh/bot-stages/bot-auto/references/ui-craft.md');
   const claudeUiCraft = result.outputs.find((o) => o.relPath === '.claude/skills/bot-auto/references/ui-craft.md');
 
-  assert.ok(agentsUiCraft && dshUiCraft && claudeUiCraft);
+  const dshThink = result.outputs.find((o) => o.relPath === '.dsh/bot-stages/bot-think/SKILL.md');
+  const claudeThink = result.outputs.find((o) => o.relPath === '.claude/skills/bot-think/SKILL.md');
+  const dshRouter = result.outputs.find((o) => o.relPath === '.dsh/skills/bot/SKILL.md');
+
+  assert.ok(agentsUiCraft && dshUiCraft && claudeUiCraft && dshThink && claudeThink && dshRouter);
   assert.match(agentsUiCraft.content, /Skeleton Test/);
   assert.match(agentsUiCraft.content, /cubic-bezier\(0\.23, 1, 0\.32, 1\)/);
   assert.match(agentsThink.content, /\.agents\/skills\/bot-auto\/references\/ui-craft\.md/);
   assert.match(agentsThink.content, /DESIGN\.md/);
   assert.match(agentsThink.content, /第一眼记忆点/);
+  assert.match(agentsThink.content, /业务问清楚优先/);
+  assert.match(agentsThink.content, /≤ 4 个独立离散选择题/);
+  assert.match(agentsThink.content, /正文分组编号清单/);
+  assert.match(claudeThink.content, /AskUserQuestion`（仅用于 ≤4 个独立选择题/);
+  assert.match(dshThink.content, /多选项确认工具仅用于 ≤4 个独立选择题/);
+  assert.match(dshRouter.content, /批量提问（业务问透优先）/);
   assert.match(agentsPlan.content, /\.agents\/skills\/bot-auto\/references\/ui-craft\.md/);
   assert.match(agentsPlan.content, /DESIGN\.md/);
   assert.match(agentsPlan.content, /交互五态/);
