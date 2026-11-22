@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added / Changed
+- **全局家目录安装路径适配与跨目录软链防误写（`lib/compiler.mjs`）**：当 `--target` 解析为用户家目录（`~`）时，自动为阶段路径与 `ui-craft.md` 参考路径添加 `~/` 前缀（同时继续硬拦截 `~/.dsh`）；并在写入前拦截经由软链逃逸出 `targetDir` 的输出路径，防止单仓安装误覆写全局 `~/.agents/skills`。
 - **新增 `/bot-auto` 全流程自动编排入口（升级为 `9 + 1` 体系）**：按任务规模（S/M/L）自动串行/跳过各阶段，只在三道硬闸门停顿确认，并按宿主注入精确阶段路径（`{{STAGE_PATH_PATTERN}}`）。
 - **增强 `/bot-build` 三路径实现分流**：区分“规则/接口/脚本（接缝 TDD）”、“陌生探索 Spike（先探后锁）”与“前端 UI 视觉（状态与展示分离）”，兼顾质量与开发心流。
 - **内嵌 UI 与交互设计检查（零额外命令、仅在涉及界面时强制激活）**：在 `/bot-think`、`/bot-plan`、`/bot-build`、`/bot-review`（维度 D）、`/bot-verify` 与 `/bot-auto` 中加入 `DESIGN.md` 首次建档/反推（第一眼记忆点、场景明暗、角色字体、可选静态 HTML 预览板）、五态补齐（空/加载/错/溢出/首用）、反套路视觉红线（禁卡片套卡片/三栏图标网格等）及响应式/可达性检查。

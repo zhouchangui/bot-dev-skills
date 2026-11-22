@@ -276,3 +276,45 @@ test('installSkills works cleanly on a completely empty brand-new directory and 
     fs.rmSync(realGitDir, { recursive: true, force: true });
   }
 });
+
+test('installSkills into homedir prefixes stage and ui-craft paths with ~/ and still blocks ~/.dsh', () => {
+  const home = os.homedir();
+  const res = installSkills({
+    sourceDir: srcRoot,
+    targetDir: home,
+    hosts: ['agents'],
+    dryRun: true,
+  });
+
+  const agentsAuto = res.outputs.find((o) => o.relPath === '.agents/skills/bot-auto/SKILL.md');
+  const agentsBuild = res.outputs.find((o) => o.relPath === '.agents/skills/bot-build/SKILL.md');
+  assert.ok(agentsAuto && agentsBuild);
+  assert.match(agentsAuto.content, /~\/\.agents\/skills\/<skill>\/SKILL\.md/);
+  assert.match(agentsAuto.content, /~\/\.agents\/skills\/bot-auto\/references\/ui-craft\.md/);
+  assert.match(agentsBuild.content, /~\/\.agents\/skills\/bot-auto\/references\/ui-craft\.md/);
+
+  assert.throws(
+    () => installSkills({ sourceDir: srcRoot, targetDir: home, hosts: ['dsh'], dryRun: true }),
+    /protected/i,
+  );
+});
+
+test('installSkills refuses to write through a skill directory symlink escaping targetDir', () => {
+  const repo = makeTempDir('bot-escape-repo-');
+  const external = makeTempDir('bot-external-global-');
+  try {
+    fs.mkdirSync(path.join(repo, '.agents', 'skills'), { recursive: true });
+    fs.mkdirSync(path.join(external, 'bot-think'), { recursive: true });
+    fs.writeFileSync(path.join(external, 'bot-think', 'SKILL.md'), '# global skill\n');
+    fs.symlinkSync(path.join(external, 'bot-think'), path.join(repo, '.agents', 'skills', 'bot-think'));
+
+    assert.throws(
+      () => installSkills({ sourceDir: srcRoot, targetDir: repo, hosts: ['agents'] }),
+      /escaping targetDir/i,
+    );
+    assert.equal(fs.readFileSync(path.join(external, 'bot-think', 'SKILL.md'), 'utf8'), '# global skill\n');
+  } finally {
+    fs.rmSync(repo, { recursive: true, force: true });
+    fs.rmSync(external, { recursive: true, force: true });
+  }
+});
