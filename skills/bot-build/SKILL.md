@@ -1,7 +1,5 @@
 ---
 name: bot-build
-order: 3
-stage: 3. 极简实现（TDD 分流）
 description: "Implement vertical slices with strict minimalism (reuse ladder, Rule of Three, zero glue bloat) and smart TDD routing (seam TDD for logic, spike-then-lock for unknowns, state/UI split). Use for: implement ticket, tdd build, write code, bot build."
 ---
 
@@ -9,7 +7,21 @@ description: "Implement vertical slices with strict minimalism (reuse ladder, Ru
 
 目标：用**最少、最干净、可被重构验证**的代码跑通纵向切片；既用接缝 TDD 守住核心逻辑质量，又不在 UI 视觉与未知探索上机械套用红绿循环破坏心流。
 
-{{PREAMBLE}}
+## 通用流控与极简铁律
+
+1. **业务问透优先，按题量/题型分流（别乒乓，也不削足适履）**：澄清多个独立问题或取舍时合并一次抛出，每题给出默认推荐与理由，**严禁为迁就交互工具的题数/字数上限而删减业务问题或把开放题硬改选择题**：
+   - **≤ 4 个独立离散选择题**：直接用宿主交互式多选工具一次点选；
+   - **> 4 题、以开放性业务问题为主，或宿主无交互工具**：改用**正文分组编号清单**（标清默认推荐，支持用户回“全默认，仅改第 N 题”），输出后**立即结束本轮等待用户回复**，不要同轮再弹截断式提问框，严禁自问自答。
+2. **三道硬暂停闸门（未经用户明确同意，严禁自行执行）**：
+   - **重大决策**：架构路线、模块公开契约/Schema 变更、删减核心范围、引入新依赖或不可逆操作。
+   - **创建分支或 worktree**：执行 `git checkout -b` / `git switch -c` / `git worktree add` 前必须先询问确认分支名与基线。
+   - **发布与合并**：执行 `git push`、创建/合并 PR、发版构建或线上部署前必须先询问确认。
+   其余探索、测试、局部重构与修 bug 连续推进，不要琐碎弹窗打断心流。
+3. **极简编码三铁律（写任何代码前先过一遍）**：
+   - **复用阶梯**：`仓库已有 helper / 模式 → 语言标准库 → 平台原生特性（如 CSS/DB 约束/原生表单控件）→ 已安装依赖`，在最高一层能解决就止步，严禁未经确认新增包。
+   - **三次法则（Rule of Three）**：同一逻辑未真实出现 3 次且无第二个真实调用方时，禁止提前抽工厂、策略类、通用配置层或猜测性抽象。
+   - **零纯转发**：禁止写只透传参数的中间转发函数（Middle Man），禁止为不可能发生的内部状态写冗余兜底分支。
+4. **宿主交互与工具映射**：采用宿主中立表达：读取/编辑文件、执行终端命令、代码库检索、向用户批量提问（≤4 个独立选择题用交互式多选工具；超 4 题、含开放性业务问题或无工具时用正文分组编号清单等待用户回复，业务问清楚优先）。
 
 ## 开工前硬检查
 
@@ -30,7 +42,7 @@ description: "Implement vertical slices with strict minimalism (reuse ladder, Ru
    - 一旦看清公共接缝，清理多余试验代码，按路径 1 补上接缝测试后再落正式实现。
 3. **前端 UI 视觉 / 静态装配（状态与展示分离）**：
    - 把状态流转、筛选、派生计算抽成纯函数走路径 1 的接缝单测；
-   - 实现布局、样式与交互前**先读 `{{UI_CRAFT_PATH}}`**：严格复用 `DESIGN.md` / 既有样式 token，落实五态、真实文案/真实产品画面、微排版（`-0.02em`、行宽控制、`tabular-nums`）、同心圆角、tinted grays（彩底禁灰字）与浏览面定制（`::selection` / 焦点环 / 滚动条）；
+   - 实现布局、样式与交互前**先读 `references/ui-craft.md`**：严格复用 `DESIGN.md` / 既有样式 token，落实五态、真实文案/真实产品画面、微排版（`-0.02em`、行宽控制、`tabular-nums`）、同心圆角、tinted grays（彩底禁灰字）与浏览面定制（`::selection` / 焦点环 / 滚动条）；
    - 交互动效统一采用 `ease-out`（`cubic-bezier(0.23,1,0.32,1)`，`scale(0.97)` 按下回弹、触发点 `transform-origin`、只动画 `transform`/`opacity`、仅 `fixed`/`sticky` 层用 `backdrop-blur`、每容器单次入场），**不写脆弱的 DOM/CSS 快照测试**，界面靠 `/bot-verify` 实跑验收。
 
 ## 写后收尾
@@ -38,6 +50,4 @@ description: "Implement vertical slices with strict minimalism (reuse ladder, Ru
 1. **写后冗余自检（极简红线）**：
    - 检查是否违反 **三次法则（Rule of Three）**（不足 3 处真实重复却提前抽了工厂/策略/配置层）。
    - 检查是否引入纯转发函数（Middle Man）或 >2 个纯胶水文件，若出现立刻内联化简。
-2. **收尾自测**：跑通受影响文件测试与项目级检查（{{CHECK_COMMAND_HINT}}），准备进入 `/bot-review`。
-
-{{STAGE_RULES}}
+2. **收尾自测**：跑通受影响文件测试与项目级检查（项目 typecheck/test），准备进入 `/bot-review`。

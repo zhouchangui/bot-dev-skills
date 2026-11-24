@@ -1,0 +1,3 @@
+interface:
+  display_name: "bot-ship · 交付与发布"
+  short_description: "Ship workflow: sync base branch, re-run full verification, update CHANGELOG and affected docs, write evidence-backed PR,"

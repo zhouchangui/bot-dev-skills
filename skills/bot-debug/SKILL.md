@@ -1,7 +1,5 @@
 ---
 name: bot-debug
-order: 4
-stage: 4. 根因调试
 description: "Tight-loop bug diagnosis: reproduce with a failing command or test first, fix at the single root owner (never patch every caller), and lock with a regression test. Use for: debug bug, fix error, diagnose failure, bot debug."
 ---
 
@@ -9,7 +7,21 @@ description: "Tight-loop bug diagnosis: reproduce with a failing command or test
 
 目标：拒绝靠猜改代码；先用最小命令复现红灯，再在单一根因点一次性修透并补回归测试。
 
-{{PREAMBLE}}
+## 通用流控与极简铁律
+
+1. **业务问透优先，按题量/题型分流（别乒乓，也不削足适履）**：澄清多个独立问题或取舍时合并一次抛出，每题给出默认推荐与理由，**严禁为迁就交互工具的题数/字数上限而删减业务问题或把开放题硬改选择题**：
+   - **≤ 4 个独立离散选择题**：直接用宿主交互式多选工具一次点选；
+   - **> 4 题、以开放性业务问题为主，或宿主无交互工具**：改用**正文分组编号清单**（标清默认推荐，支持用户回“全默认，仅改第 N 题”），输出后**立即结束本轮等待用户回复**，不要同轮再弹截断式提问框，严禁自问自答。
+2. **三道硬暂停闸门（未经用户明确同意，严禁自行执行）**：
+   - **重大决策**：架构路线、模块公开契约/Schema 变更、删减核心范围、引入新依赖或不可逆操作。
+   - **创建分支或 worktree**：执行 `git checkout -b` / `git switch -c` / `git worktree add` 前必须先询问确认分支名与基线。
+   - **发布与合并**：执行 `git push`、创建/合并 PR、发版构建或线上部署前必须先询问确认。
+   其余探索、测试、局部重构与修 bug 连续推进，不要琐碎弹窗打断心流。
+3. **极简编码三铁律（写任何代码前先过一遍）**：
+   - **复用阶梯**：`仓库已有 helper / 模式 → 语言标准库 → 平台原生特性（如 CSS/DB 约束/原生表单控件）→ 已安装依赖`，在最高一层能解决就止步，严禁未经确认新增包。
+   - **三次法则（Rule of Three）**：同一逻辑未真实出现 3 次且无第二个真实调用方时，禁止提前抽工厂、策略类、通用配置层或猜测性抽象。
+   - **零纯转发**：禁止写只透传参数的中间转发函数（Middle Man），禁止为不可能发生的内部状态写冗余兜底分支。
+4. **宿主交互与工具映射**：采用宿主中立表达：读取/编辑文件、执行终端命令、代码库检索、向用户批量提问（≤4 个独立选择题用交互式多选工具；超 4 题、含开放性业务问题或无工具时用正文分组编号清单等待用户回复，业务问清楚优先）。
 
 ## 铁律流程
 
@@ -21,6 +33,4 @@ description: "Tight-loop bug diagnosis: reproduce with a failing command or test
    - **在共享根因函数修复一处，胜过在 N 个调用方各加防御判断**。排查所有调用方，避免在症状处打补丁。
    - 严禁为“理论上不可能发生”的内部状态加冗余 fallback 掩盖真实 bug。
 4. **回归锁定**：
-   - 先确认新加/更新的回归测试在无修复时必挂、打上修复后必绿，再运行关联套件（{{CHECK_COMMAND_HINT}}）确认无连带回归。
-
-{{STAGE_RULES}}
+   - 先确认新加/更新的回归测试在无修复时必挂、打上修复后必绿，再运行关联套件（项目 typecheck/test）确认无连带回归。

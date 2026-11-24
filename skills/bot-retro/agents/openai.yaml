@@ -1,0 +1,3 @@
+interface:
+  display_name: "bot-retro · 复盘与环境进化"
+  short_description: "Session retrospective: convert recurring agent mistakes into deterministic checks (linters/hooks/tests), prune bloat fro"

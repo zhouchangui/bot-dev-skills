@@ -1,0 +1,3 @@
+interface:
+  display_name: "bot-auto · 全流程自动编排"
+  short_description: "End-to-end automated pipeline driver: orchestrates bot-think → bot-plan → bot-build/debug → bounded verify/review/fix co"

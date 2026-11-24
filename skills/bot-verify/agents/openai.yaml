@@ -1,0 +1,3 @@
+interface:
+  display_name: "bot-verify · 校验与安全门禁"
+  short_description: "Verification gate before shipping: run project check/test/smoke commands, security sanity check on auth/data diffs, and "

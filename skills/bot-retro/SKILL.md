@@ -1,7 +1,5 @@
 ---
 name: bot-retro
-order: 8
-stage: 8. 复盘与环境进化
 description: "Session retrospective: convert recurring agent mistakes into deterministic checks (linters/hooks/tests), prune bloat from AGENTS/steering docs, and evolve bot-dev-skills templates. Use for: retrospective, improve workflow, bot retro."
 ---
 
@@ -9,7 +7,21 @@ description: "Session retrospective: convert recurring agent mistakes into deter
 
 目标：不让同一个坑踩第二次。复盘对象不是刚才的业务代码，而是**Agent 工作的环境、规则与 `bot-dev-skills` 模板本身**。
 
-{{PREAMBLE}}
+## 通用流控与极简铁律
+
+1. **业务问透优先，按题量/题型分流（别乒乓，也不削足适履）**：澄清多个独立问题或取舍时合并一次抛出，每题给出默认推荐与理由，**严禁为迁就交互工具的题数/字数上限而删减业务问题或把开放题硬改选择题**：
+   - **≤ 4 个独立离散选择题**：直接用宿主交互式多选工具一次点选；
+   - **> 4 题、以开放性业务问题为主，或宿主无交互工具**：改用**正文分组编号清单**（标清默认推荐，支持用户回“全默认，仅改第 N 题”），输出后**立即结束本轮等待用户回复**，不要同轮再弹截断式提问框，严禁自问自答。
+2. **三道硬暂停闸门（未经用户明确同意，严禁自行执行）**：
+   - **重大决策**：架构路线、模块公开契约/Schema 变更、删减核心范围、引入新依赖或不可逆操作。
+   - **创建分支或 worktree**：执行 `git checkout -b` / `git switch -c` / `git worktree add` 前必须先询问确认分支名与基线。
+   - **发布与合并**：执行 `git push`、创建/合并 PR、发版构建或线上部署前必须先询问确认。
+   其余探索、测试、局部重构与修 bug 连续推进，不要琐碎弹窗打断心流。
+3. **极简编码三铁律（写任何代码前先过一遍）**：
+   - **复用阶梯**：`仓库已有 helper / 模式 → 语言标准库 → 平台原生特性（如 CSS/DB 约束/原生表单控件）→ 已安装依赖`，在最高一层能解决就止步，严禁未经确认新增包。
+   - **三次法则（Rule of Three）**：同一逻辑未真实出现 3 次且无第二个真实调用方时，禁止提前抽工厂、策略类、通用配置层或猜测性抽象。
+   - **零纯转发**：禁止写只透传参数的中间转发函数（Middle Man），禁止为不可能发生的内部状态写冗余兜底分支。
+4. **宿主交互与工具映射**：采用宿主中立表达：读取/编辑文件、执行终端命令、代码库检索、向用户批量提问（≤4 个独立选择题用交互式多选工具；超 4 题、含开放性业务问题或无工具时用正文分组编号清单等待用户回复，业务问清楚优先）。
 
 ## 复盘四问
 
@@ -22,5 +34,3 @@ description: "Session retrospective: convert recurring agent mistakes into deter
    - 这次在编码或审查中是否还是写出了冗余封装或过度抽象？是哪个阶段的提示词不够硬？
 4. **输出与跨项目反哺**：
    - 按严重度列出环境改进项（**必须落成确定性检查的** > **需更新项目文档指针的** > **建议反哺回 `bot-dev-skills` 模板源的**），确认后执行或记录。
-
-{{STAGE_RULES}}

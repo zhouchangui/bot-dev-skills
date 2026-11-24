@@ -1,7 +1,5 @@
 ---
 name: bot-review
-order: 5
-stage: 5. 多维合入评审
 description: "Unified pre-landing review: goal acceptance check + Adversarial/Chaos pass + dual-axis (Standards w/ Fowler smells + Spec compliance) + bloat audit + conditional UI audit with P0/P1/P2 severity triage and Fix-First. Use for: review diff, code review, check pr, bot review."
 ---
 
@@ -9,12 +7,26 @@ description: "Unified pre-landing review: goal acceptance check + Adversarial/Ch
 
 目标：合并前把关。用一次结构化审查同时核对**目标验收是否彻底闭环**、系统会不会在线上炸、代码是否符合标准与规格、有没有冗余膨胀，以及（若改到界面）设计系统与交互五态是否到位，按 `P0 / P1 / P2` 分级并直接修复确定性问题（Fix-First）。
 
-{{PREAMBLE}}
+## 通用流控与极简铁律
+
+1. **业务问透优先，按题量/题型分流（别乒乓，也不削足适履）**：澄清多个独立问题或取舍时合并一次抛出，每题给出默认推荐与理由，**严禁为迁就交互工具的题数/字数上限而删减业务问题或把开放题硬改选择题**：
+   - **≤ 4 个独立离散选择题**：直接用宿主交互式多选工具一次点选；
+   - **> 4 题、以开放性业务问题为主，或宿主无交互工具**：改用**正文分组编号清单**（标清默认推荐，支持用户回“全默认，仅改第 N 题”），输出后**立即结束本轮等待用户回复**，不要同轮再弹截断式提问框，严禁自问自答。
+2. **三道硬暂停闸门（未经用户明确同意，严禁自行执行）**：
+   - **重大决策**：架构路线、模块公开契约/Schema 变更、删减核心范围、引入新依赖或不可逆操作。
+   - **创建分支或 worktree**：执行 `git checkout -b` / `git switch -c` / `git worktree add` 前必须先询问确认分支名与基线。
+   - **发布与合并**：执行 `git push`、创建/合并 PR、发版构建或线上部署前必须先询问确认。
+   其余探索、测试、局部重构与修 bug 连续推进，不要琐碎弹窗打断心流。
+3. **极简编码三铁律（写任何代码前先过一遍）**：
+   - **复用阶梯**：`仓库已有 helper / 模式 → 语言标准库 → 平台原生特性（如 CSS/DB 约束/原生表单控件）→ 已安装依赖`，在最高一层能解决就止步，严禁未经确认新增包。
+   - **三次法则（Rule of Three）**：同一逻辑未真实出现 3 次且无第二个真实调用方时，禁止提前抽工厂、策略类、通用配置层或猜测性抽象。
+   - **零纯转发**：禁止写只透传参数的中间转发函数（Middle Man），禁止为不可能发生的内部状态写冗余兜底分支。
+4. **宿主交互与工具映射**：采用宿主中立表达：读取/编辑文件、执行终端命令、代码库检索、向用户批量提问（≤4 个独立选择题用交互式多选工具；超 4 题、含开放性业务问题或无工具时用正文分组编号清单等待用户回复，业务问清楚优先）。
 
 ## 审查范围锁定
 
 1. 确定对比基准（`git diff <base>...HEAD` + 未提交改动）。
-2. 同步读入用户原始目标、源 spec / ticket（{{TRACKER_HINT}}）、项目规范/设计文档（如 `DESIGN.md`）以及最新 `/bot-verify` 实测输出，列出**目标验收矩阵（`AC-1..N`）**作为核对依据。
+2. 同步读入用户原始目标、源 spec / ticket（项目 `.scratch/` 或 issue tracker）、项目规范/设计文档（如 `DESIGN.md`）以及最新 `/bot-verify` 实测输出，列出**目标验收矩阵（`AC-1..N`）**作为核对依据。
 
 ## 多维独立检查清单（不合并打分）
 
@@ -33,7 +45,7 @@ description: "Unified pre-landing review: goal acceptance check + Adversarial/Ch
 - **早熟抽象（Rule of Three）**：是否为了 1–2 个调用点新建了工厂/策略类/抽象接口？
 - **胶水与死代码**：是否存在纯转发函数（Middle Man）、>2 个纯透传胶水文件、或为不可能状态编写的冗余防御分支与未使用的导出？
 
-### 维度 D：UI 与交互审计（仅 diff 涉及页面 / 组件 / 样式 / 交互时必查，对照 `{{UI_CRAFT_PATH}}`；否则写 `无 UI 改动，跳过`）
+### 维度 D：UI 与交互审计（仅 diff 涉及页面 / 组件 / 样式 / 交互时必查，对照 `references/ui-craft.md`；否则写 `无 UI 改动，跳过`）
 - **独特性判词 & Skeleton Test**：先明确判定“抽掉品牌名和文案，是否一眼像同类可互换模板？无文案骨架主次是否立得住？”
 - **设计与微工艺偏移**：是否违背 `DESIGN.md`、出现硬编码色/间距、彩底灰字、漏改 `::selection`/`:focus-visible` 浏览面，或违背物理动效与 GPU 约束（出现 `ease-in`/`linear` 入场、容器+子项双重延迟、大面积滚动 `backdrop-blur`）？
 - **边缘五态与多断点**：空态、加载态、错态（可恢复）、长文本溢出与首用态是否遗漏？`1440 / 768 / 390` 等视口下是否错位、低对比或不可键盘操作？
@@ -48,5 +60,3 @@ description: "Unified pre-landing review: goal acceptance check + Adversarial/Ch
 - **Fix-First 与反作弊红线**：局部明确的 P0/P1 直接修复并在报告列出（**凡修改了代码，后续必须重新执行 `/bot-verify`**）；**严禁通过删测试、弱化断言、加 `skip`、空 `catch` 或放宽类型来换取通过**。
 - **硬闸门 #1**：凡涉及改变架构、公开接口、新依赖、范围取舍或不确定意图的问题，停下来列成选项交用户拍板。
 - **输出分栏**：分别报告 `Goal Acceptance (AC-1..N)`、`Adversarial`、`Spec & Standards`、`Bloat Audit`（以及涉及 UI 时的 `UI & UX Audit`）的 `P0/P1/P2` 计数、发现与修复结果，严禁捏造未验证的行号或输出。
-
-{{STAGE_RULES}}

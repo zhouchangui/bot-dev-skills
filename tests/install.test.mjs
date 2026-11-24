@@ -6,7 +6,13 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
-import { compileSkills, installSkills, safetyGuard } from '../lib/compiler.mjs';
+import {
+  buildSkillsDistribution,
+  compileSkills,
+  compileSkillsDistribution,
+  installSkills,
+  safetyGuard,
+} from '../lib/compiler.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const srcRoot = path.resolve(here, '..');
@@ -74,7 +80,7 @@ test('compileSkills rejects unknown hosts and description exceeding 1024 chars',
   const tmpSrc = makeTempDir('bot-src-longdesc-');
   try {
     fs.cpSync(srcRoot, tmpSrc, { recursive: true });
-    const badSkillPath = path.join(tmpSrc, 'skills', 'bot-think', 'SKILL.md');
+    const badSkillPath = path.join(tmpSrc, 'templates', 'bot-think', 'SKILL.tmpl.md');
     const orig = fs.readFileSync(badSkillPath, 'utf8');
     const longDesc = 'x'.repeat(1025);
     fs.writeFileSync(badSkillPath, orig.replace(/description: ".*"/, `description: "${longDesc}"`));
@@ -340,5 +346,63 @@ test('installSkills refuses to write through a skill directory symlink escaping 
   } finally {
     fs.rmSync(repo, { recursive: true, force: true });
     fs.rmSync(external, { recursive: true, force: true });
+  }
+});
+
+test('skills.sh distribution in skills/ is in sync with templates/ and self-contained with zero unrendered placeholders', () => {
+  const expected = compileSkillsDistribution({ sourceDir: srcRoot });
+  assert.equal(expected.skills.length, 9);
+
+  // Verify no raw SKILL.md exists inside templates/ so skills.sh scanners never discover raw templates
+  const templatesDir = path.join(srcRoot, 'templates');
+  for (const entry of fs.readdirSync(templatesDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    assert.equal(fs.existsSync(path.join(templatesDir, entry.name, 'SKILL.md')), false);
+    assert.equal(fs.existsSync(path.join(templatesDir, entry.name, 'SKILL.tmpl.md')), true);
+  }
+
+  // Verify every compiled file matches disk byte-for-byte with zero unrendered placeholders
+  const expectedRelPaths = new Set(expected.outputs.map((o) => o.relPath));
+  for (const out of expected.outputs) {
+    const absPath = path.join(srcRoot, out.relPath);
+    assert.ok(fs.existsSync(absPath), `Missing built skills.sh file: ${out.relPath} (run "npm run build:skills")`);
+    const actual = fs.readFileSync(absPath, 'utf8');
+    assert.equal(actual, out.content, `Out-of-date skills.sh file: ${out.relPath} (run "npm run build:skills")`);
+    assert.equal(/\{\{[A-Z0-9_]+\}\}/.test(actual), false, `Unrendered placeholder in ${out.relPath}`);
+  }
+
+  // Verify no stale extra files exist under skills/
+  const walkFiles = (dir, base = '') => {
+    const list = [];
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const rel = base ? `${base}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) list.push(...walkFiles(path.join(dir, entry.name), rel));
+      else list.push(rel);
+    }
+    return list;
+  };
+  const actualFiles = walkFiles(path.join(srcRoot, 'skills')).map((f) => `skills/${f}`);
+  assert.deepEqual(actualFiles.sort(), [...expectedRelPaths].sort());
+
+  // Verify portable paths in skills.sh build (works in both local and global installs + single-skill installs)
+  const autoSkill = expected.outputs.find((o) => o.relPath === 'skills/bot-auto/SKILL.md');
+  const thinkSkill = expected.outputs.find((o) => o.relPath === 'skills/bot-think/SKILL.md');
+  assert.match(autoSkill.content, /\.\.\/<skill>\/SKILL\.md/);
+  assert.match(autoSkill.content, /`references\/ui-craft\.md`/);
+  assert.match(thinkSkill.content, /`references\/ui-craft\.md`/);
+  for (const uiSkill of ['bot-auto', 'bot-think', 'bot-plan', 'bot-build', 'bot-review']) {
+    assert.ok(expectedRelPaths.has(`skills/${uiSkill}/references/ui-craft.md`));
+  }
+
+  // Verify buildSkillsDistribution cleans stale bot-* directories cleanly in an isolated copy
+  const tmpSrc = makeTempDir('bot-dist-build-');
+  try {
+    fs.cpSync(srcRoot, tmpSrc, { recursive: true });
+    fs.mkdirSync(path.join(tmpSrc, 'skills', 'bot-stale-old'), { recursive: true });
+    fs.writeFileSync(path.join(tmpSrc, 'skills', 'bot-stale-old', 'SKILL.md'), '# stale\n');
+    buildSkillsDistribution({ sourceDir: tmpSrc });
+    assert.equal(fs.existsSync(path.join(tmpSrc, 'skills', 'bot-stale-old')), false);
+  } finally {
+    fs.rmSync(tmpSrc, { recursive: true, force: true });
   }
 });

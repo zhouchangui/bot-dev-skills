@@ -1,7 +1,5 @@
 ---
 name: bot-auto
-order: 0
-stage: 0. 全流程自动编排
 description: "End-to-end automated pipeline driver: orchestrates bot-think → bot-plan → bot-build/debug → bounded verify/review/fix convergence loop → bot-ship, ensuring complete goal delivery and self-elevated quality while stopping only at the 3 Hard Gates. Use for: full auto flow, run full pipeline, auto review fix loop, bot auto."
 ---
 
@@ -9,7 +7,21 @@ description: "End-to-end automated pipeline driver: orchestrates bot-think → b
 
 目标：用户只需触发一次 `/bot-auto` 并描述需求，即由本编排器自动串起完整研发流水线，**通过有界“验证 ⇄ 审查 ⇄ 修复”收敛闭环确保目标彻底完成并自主提升质量**，只在大方向澄清、熔断与三道硬闸门处停下来交互。
 
-{{PREAMBLE}}
+## 通用流控与极简铁律
+
+1. **业务问透优先，按题量/题型分流（别乒乓，也不削足适履）**：澄清多个独立问题或取舍时合并一次抛出，每题给出默认推荐与理由，**严禁为迁就交互工具的题数/字数上限而删减业务问题或把开放题硬改选择题**：
+   - **≤ 4 个独立离散选择题**：直接用宿主交互式多选工具一次点选；
+   - **> 4 题、以开放性业务问题为主，或宿主无交互工具**：改用**正文分组编号清单**（标清默认推荐，支持用户回“全默认，仅改第 N 题”），输出后**立即结束本轮等待用户回复**，不要同轮再弹截断式提问框，严禁自问自答。
+2. **三道硬暂停闸门（未经用户明确同意，严禁自行执行）**：
+   - **重大决策**：架构路线、模块公开契约/Schema 变更、删减核心范围、引入新依赖或不可逆操作。
+   - **创建分支或 worktree**：执行 `git checkout -b` / `git switch -c` / `git worktree add` 前必须先询问确认分支名与基线。
+   - **发布与合并**：执行 `git push`、创建/合并 PR、发版构建或线上部署前必须先询问确认。
+   其余探索、测试、局部重构与修 bug 连续推进，不要琐碎弹窗打断心流。
+3. **极简编码三铁律（写任何代码前先过一遍）**：
+   - **复用阶梯**：`仓库已有 helper / 模式 → 语言标准库 → 平台原生特性（如 CSS/DB 约束/原生表单控件）→ 已安装依赖`，在最高一层能解决就止步，严禁未经确认新增包。
+   - **三次法则（Rule of Three）**：同一逻辑未真实出现 3 次且无第二个真实调用方时，禁止提前抽工厂、策略类、通用配置层或猜测性抽象。
+   - **零纯转发**：禁止写只透传参数的中间转发函数（Middle Man），禁止为不可能发生的内部状态写冗余兜底分支。
+4. **宿主交互与工具映射**：采用宿主中立表达：读取/编辑文件、执行终端命令、代码库检索、向用户批量提问（≤4 个独立选择题用交互式多选工具；超 4 题、含开放性业务问题或无工具时用正文分组编号清单等待用户回复，业务问清楚优先）。
 
 ## 任务定级与智能跳步（减少阻力）
 
@@ -22,7 +34,7 @@ description: "End-to-end automated pipeline driver: orchestrates bot-think → b
 * **M 级（标准新功能 / 跨文件改动 / 重构）**：
   - 完整流程：`/bot-think` → `/bot-plan` → `/bot-build` → **质量收敛闭环（≤ 3 轮）** → `/bot-ship`。
 * **L 级（大型多切片任务，预计 >3 个独立切片）**：
-  - **内外双环**：先跑通 `/bot-think` 与 `/bot-plan` 落盘全部切片与 `Blocked by` 依赖；进入 `/bot-build` 前询问用户按顺序逐片推进还是并行分派。每个切片落地后先完成局部测试与极简自检（内环），全部切片合拢后再执行全局**质量收敛闭环（≤ 3 轮，外环）**，并把验收矩阵与轮次账本同步写入当前任务规格目录（{{TRACKER_HINT}}）防长上下文稀释。
+  - **内外双环**：先跑通 `/bot-think` 与 `/bot-plan` 落盘全部切片与 `Blocked by` 依赖；进入 `/bot-build` 前询问用户按顺序逐片推进还是并行分派。每个切片落地后先完成局部测试与极简自检（内环），全部切片合拢后再执行全局**质量收敛闭环（≤ 3 轮，外环）**，并把验收矩阵与轮次账本同步写入当前任务规格目录（项目 `.scratch/` 或 issue tracker）防长上下文稀释。
 
 ## 质量收敛闭环（Verify ⇄ Review ⇄ Fix）
 
@@ -55,13 +67,11 @@ description: "End-to-end automated pipeline driver: orchestrates bot-think → b
 
 ## 编排执行铁律
 
-1. **按需读入阶段规范**：每次进入下一阶段时，用文件读取工具直接读取对应阶段文件（`{{STAGE_PATH_PATTERN}}`），严格执行其门禁与检查项，不要凭记忆跳步。
-2. **UI 影响面强制激活**：只要需求涉及页面、官网、组件、样式或前端交互，**务必按需读取 `{{UI_CRAFT_PATH}}` 并激活** `/bot-plan` 的 UI 与五态检查、`/bot-build` 的状态展示分离与微工艺落地、`/bot-review` 的维度 D（独特性判词与 UI 审计）及 `/bot-verify` 的真实界面验收；纯后端/CLI 任务则自动跳过 UI 检查，零额外开销。
+1. **按需读入阶段规范**：每次进入下一阶段时，用文件读取工具直接读取对应阶段文件（`../<skill>/SKILL.md`），严格执行其门禁与检查项，不要凭记忆跳步。
+2. **UI 影响面强制激活**：只要需求涉及页面、官网、组件、样式或前端交互，**务必按需读取 `references/ui-craft.md` 并激活** `/bot-plan` 的 UI 与五态检查、`/bot-build` 的状态展示分离与微工艺落地、`/bot-review` 的维度 D（独特性判词与 UI 审计）及 `/bot-verify` 的真实界面验收；纯后端/CLI 任务则自动跳过 UI 检查，零额外开销。
 3. **不重复提问**：`/bot-think` 已经向用户确认过的问题与方案，自动带入 `/bot-plan` 与 `/bot-build`，严禁重复弹窗。
 4. **只守三道硬闸门**：
    - **闸门 #1（重大决策）**：仅在 `/bot-think` 批量澄清+方案拍板时、或后续阶段/收敛环中发现未预见的跨模块/Schema/新依赖/范围变更时停下来问。
    - **闸门 #2（建分支/worktree）**：在 `/bot-build` 动代码前，如需建分支或 worktree 必须先问确认；若用户明确要求直接在当前分支改则直接开工。
    - **闸门 #3（发布与合并）**：质量收敛闭环满足硬退出门槛后，在 `/bot-ship` 执行 `git push` / 创建或合并 PR / 部署前停下来展示证据、验收矩阵与轮次账本等用户拍板。
 5. **复盘轻量收尾**：交付完成后，仅在本次确实暴露出“值得沉淀成 linter/hook/测试的重复坑”时，附带一句提示是否执行 `/bot-retro`；顺畅无坑时不打扰。
-
-{{STAGE_RULES}}
