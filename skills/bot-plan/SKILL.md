@@ -27,7 +27,7 @@ description: "Turn aligned design into executable spec, tracer-bullet vertical s
    - 每个 ticket 必须是从输入到输出可独立跑通验证的**垂直切片**（不要按“全做 schema → 全做 API → 全做 UI”横向切片）。
    - 大范围机械重构采用 **Expand–Contract**（先兼容扩展、分批迁移、最后收口删除旧路径），确保每步绿色。
    - 若项目已有工单约定按其落盘（{{TRACKER_HINT}}）；无既有约定则在 `.scratch/<feature>/` 自包含落盘：
-     - `spec.md`：`Problem` / `Solution` / `Decisions` / `Data Flow & Failure Modes` / `UI & States (if applicable)` / `Test Seams` / `Out of Scope`；
+     - `spec.md`：`Necessity / Why`（根问题与不做代价）/ `Problem` / `Solution` / `Decisions` / `Data Flow & Failure Modes` / `UI & States (if applicable)` / `Test Seams` / `Out of Scope (Cut List)`；
      - `issues/<NN>-<slug>.md`（一票一文件）：`Status: ready-for-agent`、`Blocked by: <NN | None>`、**交付行为**、**公共测试接缝**与**验收清单**。
 5. **对齐确认**：仅当本阶段发现 `/bot-think` 未覆盖的跨模块/Schema/UI 主结构/范围变更时，触发**硬闸门 #1**由用户确认；已对齐则直接进入 `/bot-build`。
 

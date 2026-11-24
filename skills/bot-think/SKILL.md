@@ -2,21 +2,25 @@
 name: bot-think
 order: 1
 stage: 1. 构思与澄清
-description: "Idea sharpening and architecture framing: batched clarification, premise challenge, 2-3 structural alternatives, and ADR/glossary/DESIGN.md grounding. Use for: brainstorm, clarify requirements, bot think."
+description: "Idea sharpening and architecture framing: first-principles feature necessity & cut-list analysis, batched clarification, Option 0 vs 2-3 structural alternatives, and ADR/glossary/DESIGN.md grounding. Use for: brainstorm, clarify requirements, feature necessity, bot think."
 ---
 
-# /bot-think — 构思、前提挑战与批量澄清
+# /bot-think — 第一性原理必要性分析、构思与批量澄清
 
-目标：在动一行代码前，先把问题定义、边界假设、视觉系统（若含新界面或改版）与 2–3 条备选路线对齐，产物是一份精简设计稿、`DESIGN.md` 或 ADR 结论（**严禁在本阶段写业务代码**）。
+目标：在动一行代码前，先用**第一性原理验明功能必要性并砍掉伪需求**，再把问题定义、边界假设、视觉系统（若含新界面或改版）与备选路线对齐，产物是一份精简设计稿、`DESIGN.md` 或 ADR 结论（**严禁在本阶段写业务代码**）。
 
 {{PREAMBLE}}
 
 ## 执行步骤
 
 1. **先读上下文再提问**：快速扫描项目入口文档（`AGENTS.md` / `CLAUDE.md`）、领域术语表（如 `CONTEXT.md` / `GLOSSARY.md`）、`DESIGN.md`（若含界面）与现有 `docs/adr/`，不问仓库里已经写明的事实。
-2. **前提挑战（Premise Challenge）**：
-   - 这是不是正确的问题？如果什么都不做会怎样？
-   - 仓库现有代码、标准库或既有工具是否已经解决了一部分？
+2. **第一性原理必要性审查（First-Principles Necessity Gate · 先审该不该做，再谈怎么做）**：
+   - **剥离方案、还原根目标（反 XY Problem）**：把用户提的表层方案/功能诉求拆解还原到不可再分的底层真实目标、目标用户、触发频次与根本瓶颈；
+   - **减法四问（先删改、再替代、最后才新建）**：
+     1. **不做会怎样**：维持现状的真实损失是什么、多久发生一次？
+     2. **能否靠删减解决**：能否通过删除多余步骤/约束或简化现有流程解决（做减法优先于做加法）？
+     3. **能否零新代码替代**：改配置/文档、或直接借仓库已有能力/标准库/既有工具能否解决 80%？
+     4. **必要性拆刀（Cut List）**：把原需求切分为 **Must-Have（删了根目标就不成立的最小核）** 与 **Nice-to-Have / 伪需求（先砍掉，写入 `Out of Scope`）**。
 3. **结构化批量澄清（业务问清楚优先）**：
    - 把所有未决业务规则、边界条件、范围取舍与开放性疑问**完整合并**一次抛出，每个问题给出默认推荐选项与理由，快速收敛到无歧义状态；**宁可用正文清单问全，也绝不为了塞进弹窗而砍掉业务关键问题或自行脑补假设**。
    - **交互方式分流**：仅当全部是 **≤ 4 个独立离散选择题**时调用交互式多选工具；一旦 **> 4 题** 或 **以开放性/需展开说明的业务问题为主**，直接输出**正文分组编号清单**（附默认推荐，方便用户一句“全按默认，只改 2 和 5”快速回复）并结束本轮等待回复，不要在同一轮混用截断的弹窗；待后续进入步骤 5（硬闸门 #1 选方案）时再用多选工具拍板。
@@ -25,11 +29,12 @@ description: "Idea sharpening and architecture framing: batched clarification, p
    - **已有代码反推 vs 从零提案（避开默认皮肤）**：已有前端代码时先从现有样式变量/主题配置提炼草案；0→1 新建时给出 **2–3 套有明显审美差距的方向**（气质定位 + 带色相倾向的中性灰/品牌色 Token + 角色字体 Display/Body-UI/Mono + 布局密度 + 1–2 个刻意拉开差距的设计点），明令避开 AI 常见默认皮肤与静态套娃结构。
    - **视觉红线 & 自检两遍**：先写完整构图/文案骨架再自查一遍是否沦为可互换模板，严禁卡片套卡片、三栏彩色圆圈图标网格、标题上方无意义全大写小药丸、`→`/`↗` 装饰按钮、暗底霓虹光晕与假数据占位。
    - **可选静态预览**：拍板前如需眼见为实，可先生成单文件静态 HTML 样式预览页展示真实色板/字阶/组件与空错态，确认后再固化。
-5. **多形态备选方案对比**：
-   - 至少给出 **2 个结构有本质差异的方案**（如“最小可行” vs “更深接口封装”），标明工作量、风险、改动文件规模与推荐理由。
-   - **硬闸门 #1（重大决策）**：停下来由用户拍板选定方案（及设计方向），再进入 `/bot-plan` 或落盘设计文档。
+5. **多形态备选方案对比（含 Option 0 出口）**：
+   - 至少给出 **2 个结构有本质差异的实现方案**（如“最小可行” vs “更深接口封装”），标明工作量、长期维护成本、风险、改动文件规模与推荐理由；
+   - **强制保留 `Option 0`**：只要第 2 步发现功能必要性存疑、收益不抵复杂度，或存在减法/零代码替代路径，**必须把 `Option 0（不做 / 删改现有流程或零代码替代）` 列为正式备选之一**；
+   - **硬闸门 #1（重大决策）**：停下来由用户拍板是否要做及选定方案（与设计方向），再进入 `/bot-plan` 或落盘设计文档。
 6. **独立落盘模板**：
-   - 设计稿默认写到 `docs/designs/<feature>.md`（或项目约定的规格目录）；
+   - 设计稿默认写到 `docs/designs/<feature>.md`（或项目约定的规格目录），必含 **`Necessity / Why`（根目标与不做代价）** 与 **`Out of Scope / Cut List`（刻意不做的部分）**；
    - 新建/更新的设计系统落盘到根目录 `DESIGN.md`（结构：定位与记忆点 / 色彩 Tokens / 角色字体与字阶 / 间距与圆角 / 布局与五态 / 视觉红线；若用户明确只做临时草稿则记入单任务 `spec.md`）；
    - 若形成不可逆架构决策，顺手写一份精简 ADR 到 `docs/adr/<NNNN>-<slug>.md`（`Context` → `Decision` → `Consequences`）。
 

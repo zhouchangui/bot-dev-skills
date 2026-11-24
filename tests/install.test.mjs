@@ -237,6 +237,9 @@ test('rendered skills are self-contained with zero leaked external skill referen
   assert.match(agentsThink.content, /\.agents\/skills\/bot-auto\/references\/ui-craft\.md/);
   assert.match(agentsThink.content, /DESIGN\.md/);
   assert.match(agentsThink.content, /第一眼记忆点/);
+  assert.match(agentsThink.content, /第一性原理必要性审查/);
+  assert.match(agentsThink.content, /必要性拆刀（Cut List）/);
+  assert.match(agentsThink.content, /Option 0（不做/);
   assert.match(agentsThink.content, /业务问清楚优先/);
   assert.match(agentsThink.content, /≤ 4 个独立离散选择题/);
   assert.match(agentsThink.content, /正文分组编号清单/);
@@ -246,13 +249,24 @@ test('rendered skills are self-contained with zero leaked external skill referen
   assert.match(agentsPlan.content, /\.agents\/skills\/bot-auto\/references\/ui-craft\.md/);
   assert.match(agentsPlan.content, /DESIGN\.md/);
   assert.match(agentsPlan.content, /交互五态/);
+  assert.match(agentsPlan.content, /Necessity \/ Why/);
+  assert.match(agentsPlan.content, /Out of Scope \(Cut List\)/);
   assert.match(agentsBuild.content, /\.agents\/skills\/bot-auto\/references\/ui-craft\.md/);
   assert.match(dshBuild.content, /\.dsh\/bot-stages\/bot-auto\/references\/ui-craft\.md/);
   assert.match(claudeReview.content, /\.claude\/skills\/bot-auto\/references\/ui-craft\.md/);
   assert.match(agentsReview.content, /维度 D：UI 与交互审计/);
   assert.match(agentsReview.content, /卡片套卡片/);
   assert.match(agentsReview.content, /独特性判词/);
+  assert.match(agentsReview.content, /目标验收矩阵/);
+  assert.match(agentsReview.content, /Out of Scope \(Cut List\)/);
+  assert.match(agentsReview.content, /P0 \/ P1 \/ P2/);
+  assert.match(agentsReview.content, /M\/L 级改动默认派干净上下文独立子代理/);
   assert.match(agentsAuto.content, /UI 影响面强制激活/);
+  assert.match(agentsAuto.content, /第一性原理必要性速审/);
+  assert.match(agentsAuto.content, /质量收敛闭环/);
+  assert.match(agentsAuto.content, /S 级 ≤ 2 轮、M\/L 级 ≤ 3 轮/);
+  assert.match(agentsAuto.content, /硬退出门槛（Exit Gate）/);
+  assert.match(agentsAuto.content, /双熔断/);
 });
 
 test('installSkills works cleanly on a completely empty brand-new directory and git worktree', () => {

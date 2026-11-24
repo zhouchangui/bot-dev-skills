@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added / Changed
+- **内嵌第一性原理功能必要性审查（`/bot-think`、`/bot-auto`、`/bot-plan`、`/bot-review`）**：把 `/bot-think` 前提挑战升级为“剥离表层方案还原根目标 + 减法四问 + Must-Have/Cut List 拆刀 + 存疑时强制保留 `Option 0（不做/删改/零代码替代）`”，在 `/bot-auto` 中要求 S 级新增功能/入口/开关也必须先过 30 秒必要性速审，并在 `docs/designs/`、`spec.md` 与 `/bot-review` 的 `Scope Creep` 审计间贯通 `Necessity / Why` 与 `Out of Scope (Cut List)`。
+- **升级 `/bot-auto` 与 `/bot-review` 为有界“验证 ⇄ 审查 ⇄ 修复”质量收敛闭环**：新增显式目标验收矩阵（`AC-1..N`）、`P0/P1/P2` 严重级分流（P0 必修、P1 预算内主动质量抬升、P2 只记不改）、反作弊红线（禁删测/弱化断言）、独立冷视角审查（支持子代理宿主对 M/L 级默认派干净上下文独立子代理，单代理宿主优雅降级）、自适应轮次预算（`S ≤ 2 / M·L ≤ 3`，深度打磨口令可放宽至 `≤ 5`）+ 双熔断 + 硬退出门槛，并为 L 级多切片任务启用“切片内测 + 全局收敛外环”与账本落盘。
 - **优化批量澄清交互分流（`skills/preamble.md`、`skills/bot-think/SKILL.md` 与各宿主 `toolNotes`）**：明确“业务问清楚优先”，≤ 4 个独立选择题使用宿主交互式多选工具，超 4 题或以开放性业务问题为主时切换为正文分组编号清单（附默认推荐）并等待回复，避免受单次 4 题上限截断业务澄清。
 - **全局家目录安装路径适配与跨目录软链防误写（`lib/compiler.mjs`）**：当 `--target` 解析为用户家目录（`~`）时，自动为阶段路径与 `ui-craft.md` 参考路径添加 `~/` 前缀（同时继续硬拦截 `~/.dsh`）；并在写入前拦截经由软链逃逸出 `targetDir` 的输出路径，防止单仓安装误覆写全局 `~/.agents/skills`。
 - **新增 `/bot-auto` 全流程自动编排入口（升级为 `9 + 1` 体系）**：按任务规模（S/M/L）自动串行/跳过各阶段，只在三道硬闸门停顿确认，并按宿主注入精确阶段路径（`{{STAGE_PATH_PATTERN}}`）。
