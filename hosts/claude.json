@@ -5,5 +5,5 @@
   "symlinkFrom": ".agents/skills",
   "routerMode": "per-skill",
   "descriptionLimit": 1024,
-  "toolNotes": "对应 Claude Code 工具集：`Read`/`Edit`/`Write`、`Bash`、`Grep`/`Glob`、`Agent`、`AskUserQuestion`（仅用于 ≤4 个独立选择题；超 4 题或含开放性业务问题时用正文分组编号清单等待用户回复，避免受单次 4 题上限截断业务问题）。"
+  "toolNotes": "对应 Claude Code 工具集：`Read`/`Edit`/`Write`、`Bash`、`Grep`/`Glob`、`Agent`；`AskUserQuestion` 仅用于硬闸门与最终方案拍板，所有需求澄清与追问一律正文输出。"
 }

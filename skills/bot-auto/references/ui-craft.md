@@ -1,106 +1,67 @@
-# UI 与现代 Web 工程工艺参考（仅在涉及界面/官网/样式/交互时按需加载）
+# UI 与现代 Web 工程工艺参考（仅涉及界面/官网/样式/交互时按需加载）
 
-> 适用场景：Web 官网、营销着陆页（Persuade）及产品前端界面（App / Workbench）。纯后端/CLI 任务勿读，保持零开销。
-
----
-
-## 1. 审美红线与 Craft Floor（反 AI 模板味黑名单）
-
-- **拒绝 5 类 AI 默认皮肤**：
-  1. 暖米白（`#F4F1EA`）配赤陶橙（`#D97757`）默认文艺风；
-  2. 纯黑底配荧光绿高饱和发光 Bento 网格；
-  3. 无主题支撑的泛用宽报拼贴风；
-  4. 千篇一律的“主标题 + 副标题 + 3 列彩色圆圈图标卡片”；
-  5. 标题上方漂浮全大写微型药丸（ALL-CAPS eyebrow pill）搭配按钮内嵌 `→` / `↗` 箭头。
-- **结构与容器节制**：
-  - 严禁**卡片套卡片**；能用留白、字号阶梯与网格对齐区分层级，就不要套边框盒子。
-  - 一套界面只选**一种**层次区分方式（背景色阶差 / 极细描边 / 极柔和阴影 三选一），不混用。
-  - 严禁手绘感涂鸦 SVG、图片下方多余解释图注、或强行把多步骤/详情页全塞进 Modal。
-- **同心圆角几何**：外层壳与内层容器保持 `innerRadius = outerRadius - padding`，避免内外圆角打架。
-- **浏览面完整打磨**：必须同步定制 `::selection`、`caret-color`、滚动条样式（`scrollbar-color` / `scrollbar-gutter`）与清晰 `:focus-visible` 焦点环（不能靠浏览器默认蓝框），并兼容高对比度偏好。
-- **色彩秩序**：中性灰须带轻微品牌色相倾向（Tinted Grays），避免死板纯灰；**严禁在彩色背景上放置灰色文字**（改用同色相的深/浅阶）。
+> 适用：官网/着陆页（Mode A）与产品前端/工作台（Mode B）。纯后端/CLI 任务勿读。
 
 ---
 
-## 2. 界面形态双模式分流（先定模式，勿拿官网留白套工具台）
+## 1. 审美红线与 Craft Floor（反 AI 模板味）
 
-动手或评审前先明确当前界面属于 **Mode A（叙事转化型）** 还是 **Mode B（高频生产力工具台型）**，按对应基准执行：
-
-### 2A. 营销官网 / 着陆页（Mode A: Marketing / Persuade）
-
-- **首屏三要素（Above the Fold）**：第一眼讲清 **卖什么 + 给谁用 + 至少 1 个硬事实**（真实数据、能力边界或位置信息），并直接露出**可工作的首要转化动作**（不要只放装饰性跳转锚点）。
-- **世界观承载而非贴纸**：视觉材质与色彩比例贯穿骨架与表面，而不是“白底通用模板 + 刷一点品牌强调色”。
-- **文案先于排版**：用主动语态；每个标题包含实义名词；按钮文案采用“动词 + 宾语”；严禁虚构团队人名、客户数量、虚假报价或空洞口号。
-- **屏幕节奏与边界对齐**：桌面端以整屏视口（`min-h-[100dvh]` / `100svh`）组织叙事，1–2 屏讲透 1 个观点，搭配大留白（如 `py-24` 起步）；全页左右内容保持严谨的垂直对齐边界。
-- **真实材质优先**：软件/工具类官网优先展示**真实产品界面片段或架构图**；消费/服务/空间类优先使用**真实摄影 + 版式 + 纯色块**。WebGL / Shader 仅限技术、软件或游戏页面确有必要时使用，并带移动端/减弱动效降级。
-
-### 2B. 产品应用 / 高密度工作台（Mode B: App / Workbench）
-
-- **主画布与有效密度优先**：把首屏视口留给主工作区（画布、时间轴、编辑器、数据表或核心任务面板），**禁止照搬营销页的 `min-h-[100dvh]` 分屏叙事与 `py-24` 大留白推挤有效操作区**。
-- **壳层锁定与独立滚动**：高频工作台采用固定导航/工具壳层 + 内容面板独立滚动（长列表按需虚拟化或设 `content-visibility: auto`），避免整页长滚动导致工具条与上下文丢失。
-- **键盘流与就地反馈**：高频筛选、面板折叠、命令切换与提交必须支持键盘直达（清晰焦点环 + 快捷键提示），状态反馈就地呈现，禁止用全屏成功页或多余确认弹窗打断连续操作。
-- **紧凑基线与防跳动**：工具栏、属性栏与数据列保持紧凑网格步进（如 `4px / 8px`），动态数值与状态徽章固定槽位宽度（配合 `tabular-nums`）防止操作时界面抖动。
-
-### 2C. 通用骨架校验（Skeleton Test · 双模式必过）
-
-- **Skeleton Test（骨架校验）**：抽干页面全部文字与图片后，仅靠排版比例、空间分区与结构母题，是否仍能看出强弱主次与品牌气质（Mode A 看叙事节奏，Mode B 看主工作区与辅助面板权重）？如果全靠“字大”或堆边框才撑住，说明设计尚未立住。
+- **禁用 5 类 AI 默认皮肤**：① 暖米白 `#F4F1EA` 配赤陶橙 `#D97757`；② 纯黑底荧光绿发光 Bento；③ 无主题宽报拼贴；④ “主标题 + 副标题 + 3 列彩色圆圈图标卡”；⑤ 标题上方全大写微药丸（eyebrow pill）+ 按钮内嵌 `→`/`↗`。
+- **容器与层次节制**：严禁**卡片套卡片**；一套界面只选一种层次手段（色阶差 / 极细描边 / 极柔阴影 三选一）；禁手绘涂鸦 SVG、多余图注、把多步骤详情硬塞 Modal。
+- **几何与色彩**：同心圆角 `innerRadius = outerRadius - padding`；中性灰带轻微品牌色相（Tinted Grays）；**严禁彩底灰字**（改用同色相深/浅阶）；渐变优先 `oklch` 多停靠点插值消生硬灰带。
+- **浏览面打磨**：同步定制 `::selection`、`caret-color`、`scrollbar-color`/`scrollbar-gutter` 与清晰 `:focus-visible` 焦点环，兼容高对比度。
 
 ---
 
-## 3. 排版微雕与细节数值
+## 2. 界面双模式分流 & Skeleton Test
 
-- **角色字栈与防闪烁回退**：明确区分 Display（视觉张力）、Body/UI（高可读性）、Mono/数字（精确对齐），禁止回退至无意识系统裸字栈；自定义字体配置 `size-adjust` / `font-size-adjust` 保持字体切换时视觉尺寸稳定，全站采用 `rem` 尊重系统字号缩放偏好。
-- **微排版校准**：
-  - 大标题适度收紧字距（英文如 `-0.02em`，行高 `1.15–1.3`）并启用 `text-wrap: balance` 均衡断行；
-  - 正文控制最佳行宽（英文 `<= 65ch`，中文约 `30–40` 字/行，行高 `1.65–1.8`）并启用 `text-wrap: pretty`；
-  - 数据、价格、指标与对比列统一开启 `font-variant-numeric: tabular-nums`；
-  - 减少滥用极粗字重（如将全页 `900`/`700` 下调为 `600`/`500`，用尺度和空间拉开层级）。
-- **高级渐变与现代色域**：优先在 `oklch` 等感知均匀色域做色阶插值，遮罩与背景渐变采用多停靠点非均匀插值（ease-in-out 透明度曲线），消除两色线性渐变的生硬灰暗分割线。
+动手或评审前先锁定模式，严禁拿官网留白套工具台：
 
----
-
-## 4. 物理手感与动效编排（Motion Craft）
-
-- **曲线与时长铁律**：
-  - 进场与交互动效统一采用 **`ease-out`**（参考 `cubic-bezier(0.23, 1, 0.32, 1)` 或 `ease-out-quart`）；**严禁对 UI 进场/响应使用 `ease-in` 与机械 `linear`**。
-  - 功能型交互（弹窗/切换/抽屉）严格控制在 **`< 300ms`**；按钮点击给物理回弹（`:active { transform: scale(0.97) }`）；浮层/下拉从触发按钮所在方位设置 `transform-origin`。
-- **动效角色与编排四律**：
-  1. **角色分配**：先划分 `Lead`（唯一主角，幅度最大先动）→ `Support`（从属短距跟进）→ `Decoration`（仅淡入不位移）→ `Static`（容器与无关区域保持静止）；
-  2. **每容器单次入场**：容器整体滑入时，内部元素必须已就位；**严禁外层入场 + 子列表二次 stagger 延迟**；
-  3. **高频场景零动画**：高频菜单、命令面板、Tab 切换、重复键盘操作严禁加延迟或 stagger；仅官网首屏等首次访问时刻可使用非线性波浪错峰（`100–150ms` 递进，总时长约 `0.5–0.6s`，严禁等距“节拍器”）；
-  4. **GPU 与可中断性**：仅对 `transform`（或独立 `translate`/`scale`/`rotate` 属性）与 `opacity` 做动画；`backdrop-blur` 只准挂在 `fixed`/`sticky` 导航或遮罩层，严禁用于大面积滚动内容；退场元素立即脱离布局流（`position: absolute` / Top Layer）让相邻元素同步补位，且所有动效必须支持中途打断与 `prefers-reduced-motion`。
+- **Mode A: Marketing / Persuade（官网 / 着陆页）**
+  - **首屏三要素**：一眼讲清 **卖什么 + 给谁用 + 至少 1 个硬事实**，直接露出**可工作的首要转化动作**（非装饰锚点）；
+  - **文案与材质**：主动语态、实义标题、动词+宾语按钮，禁虚构人名/客户数/假指标；软件优先**真实产品画面/架构图**，消费/服务用**真实摄影+版式+色块**（WebGL 仅技术/游戏确有必要时用并带降级）；
+  - **节奏**：桌面 `min-h-[100dvh]`/`100svh` 1–2 屏 1 观点 + 大留白（`py-24` 起）+ 全页垂直对齐边界。
+- **Mode B: App / Workbench（产品应用 / 高密度工作台）**
+  - **主画布优先**：首屏让给核心工作区，**禁搬营销页 `min-h-[100dvh]` 分屏与 `py-24` 大留白**；
+  - **固定壳层 + 独立滚动**：顶/侧壳层锁定，长列表虚拟化或 `content-visibility: auto`；
+  - **键盘流与防跳动**：高频操作支持键盘直达与就地反馈（禁全屏成功页/多余弹窗），`4px/8px` 紧凑网格，动态数值/徽章固定槽宽 + `tabular-nums`。
+- **Skeleton Test（双模式必过）**：抽干全部文案和图片后，仅靠排版比例、空间分区与母题能否立住主次与气质？全靠字大或边框撑住即未过关。
 
 ---
 
-## 5. 现代 Web 原生平台优先（反历史 JS Hack 与渐进增强）
+## 3. 排版微雕
 
-AI 训练语料充斥早期手写 JS 补丁。编写或改造 Web 界面时，优先采用跨主流浏览器互通的 **Baseline 原生 HTML / CSS 能力**，淘汰脆弱的命令式 Hack：
-
-- **兼容基线与渐进增强分流（Baseline First）**：
-  - 未显式声明浏览器策略时，默认选用 **Baseline Widely Available** 特性；使用较新原生特性（Newly Available）时按风险分流：① **忽略即安全退化类**（如 `field-sizing: content`、`text-wrap: balance`）直接声明并配好 `min/max` 尺寸边界；② **核心交互必保类**用 `@supports` 或极简条件分支降级，严禁引入臃肿 Polyfill 库；未经用户明确授权禁止使用单引擎未稳定特性或 Origin Trial。
-  - **改造存量代码防误伤**：清理旧写法前先核对上下文，保留刻意的 `@supports` 兼容兜底与虚拟滚动测量逻辑，严禁为追求表面“零旧写法”盲删安全降级分支。
-- **原生顶层交互层（`<dialog>` 与 `popover` 替代手写遮罩监听）**：
-  - 模态对话框优先用原生 `<dialog>` + `showModal()`（支持 `<dialog closedby="any">` 轻点外侧关闭与平台原生 `Esc`/返回手势，自动锁定焦点与背景惰性；**严禁手写 `e.target === dialog` 点击关窗逻辑破坏框选文本拖拽**，也勿在原生 `<dialog>` 上重复堆砌 `role="dialog"` / `aria-modal`）。
-  - 菜单、气泡、提示卡优先用声明式 `popover` + `popovertarget`（配合 CSS Anchor Positioning 自动翻转防视口裁切，用 `@starting-style` + `transition-behavior: allow-discrete` 实现进出 Top Layer 过渡），少写命令式开关监听器；在 React 等框架中对非受控 ref 调用 `showModal()` 并做好 SSR `window`/`HTMLElement` 守卫。
-- **现代原生表单与中文 / CJK 输入法安全（高频必查）**：
-  - **IME 输入法回车守卫**：所有监听 `Enter` 提交的输入框与 `textarea`（聊天、搜索、行内重命名），**必须加 `if (e.isComposing || e.keyCode === 229) return;` 守卫**，严防中文/日韩输入法选词上屏瞬间误触发提交。
-  - **交互后校验反馈**：用 `:user-invalid` / `:user-valid`（并与屏幕阅读器 `aria-invalid` 同步）仅在用户交互后展示错误态，**严禁使用裸 `:invalid` 导致页面初载或输入半截时提前满屏标红**。
-  - **零重排自适应与原生控件**：多行输入自动增高优先用 CSS `field-sizing: content`（配 `min-block-size` / `max-block-size`），**严禁每次输入读取 `scrollHeight` 强制同步重排**；登录、注册、支付、地址与短信验证码表单补齐标准 `autocomplete` 属性；复选框/滑块/进度条优先用 `accent-color`、`color-scheme` 与原生 `<input type="checkbox" switch>` 渐进增强，而非用 `div` 重造失焦假控件。
-- **现代 CSS 架构替代魔法数字与状态胶水**：
-  - **固有尺寸过渡**：折叠面板/手风琴用 `interpolate-size: allow-keywords`、`calc-size()` 或 Grid `0fr → 1fr` 动画，**严禁写 `max-height: 9999px` 假动画导致缓动失真**；需要支持浏览器页内查找（`Cmd/Ctrl+F`）的折叠内容优先用 `hidden="until-found"` 或 `<details>`。
-  - **容器查询与关系选择器**：组件自适应优先用 `@container` 容器查询与 `subgrid` 而非全局视口硬断点；父容器随子表单/勾选态变样式用 `:has(:checked)` / `:has(:focus-visible)` / `:has(:user-invalid)`，**禁止为此写 JS 往父节点搬运状态 class**；明暗双主题用 `color-scheme: light dark` 配合 `light-dark()` 消除重复的 `@media (prefers-color-scheme: dark)` 块。
-- **Core Web Vitals（LCP / INP / CLS）与前端安全护栏**：
-  - **LCP / CLS**：首屏主视觉图片显式标记 `fetchpriority="high"`（**严禁对首屏 LCP 图加 `loading="lazy"`**），所有媒体显式声明尺寸或 `aspect-ratio` 消除布局偏移（CLS），屏外图片/音视频按需懒加载。
-  - **INP 与后台节流**：避免滚动期间做同步重排（可延后至 `scrollend`），长计算分片让出主线程（如 `scheduler.yield()`），组件离屏或标签页后台时暂停 `<canvas>` / WebGL / 高频轮询。
-  - **子资源与 DOM 安全**：外部 CDN 脚本/样式必带 `integrity`（SRI）与 `crossorigin="anonymous"`；渲染不可信 HTML 必须经标准 Sanitizer 或 Trusted Types 过滤，严禁裸写 `innerHTML`。
+- **角色字栈**：区分 Display / Body-UI / Mono，禁无意识裸系统字栈；自定义字体配 `size-adjust`/`font-size-adjust` 防闪烁，全站 `rem` 尊重缩放。
+- **校准数值**：大标题收紧字距（英文 `-0.02em`，行高 `1.15–1.3`）+ `text-wrap: balance`；正文限宽（英文 `<= 65ch`，中文 `30–40` 字/行，行高 `1.65–1.8`）+ `text-wrap: pretty`；数据/指标列 `font-variant-numeric: tabular-nums`；少用 `900`/`700`，靠尺度与留白拉层级。
 
 ---
 
-## 6. 评审与手术调校四动词
+## 4. 物理手感与动效编排
 
-评审时先输出一句 **独特性判词（Specificity Verdict）**：“抽掉品牌名和文案，这套页面是专为此产品打造的，还是换个同类 Logo 也能套用？”随后按病因择一施治：
+- **曲线与时长**：进场/交互统一 `ease-out`（`cubic-bezier(0.23, 1, 0.32, 1)`），**禁 `ease-in` 与机械 `linear`**；功能交互 `< 300ms`；点击 `:active { transform: scale(0.97) }`；浮层设触发点 `transform-origin`。
+- **编排四律**：① 划分 `Lead`（主角先动）→ `Support` → `Decoration`（仅淡入）→ `Static`；② **每容器单次入场**，严禁外层入场 + 子列表二次 stagger；③ **高频操作零延迟零 stagger**（仅首访首屏可用非线性波浪 `100–150ms` 总长 `0.5–0.6s`）；④ 只动画 `transform`/`opacity`，`backdrop-blur` 仅限 `fixed`/`sticky` 层，退场立即离流，必支持中途打断与 `prefers-reduced-motion`。
 
-- **提纯（Distill）**：砍多余边框、嵌套卡片、冗余色值、重复解释与可用原生 HTML/CSS 替代的冗余 JS 胶水；Mode A 每屏收敛到 1 个核心动作，Mode B 移除遮挡主画布的装饰。
-- **降噪（Quieter）**：降低高饱和色彩与字重冲突、引入 tinted gray 与恰当呼吸留白，做“有观点的克制”，避免堕入白底灰字平庸风。
-- **强化（Bolder）**：不准新加颜色、新字体或花哨特效；只把当前系统已有最强母题、标题比例与对比节奏拉到极致，并通过 Skeleton Test。
-- **打磨（Polish）**：跨桌面/平板/手机（如 `1440 / 768 / 390`）实测长文案溢出、交互五态、IME 回车安全、原生焦点管理、对比度、光学校准与字体加载稳定性。
+---
+
+## 5. 现代原生 Web 平台优先（反历史 JS Hack · 渐进增强）
+
+- **Baseline 兼容基线**：未声明策略时默认 **Baseline Widely Available**；Newly Available 按风险分流：① 忽略即安全退化（`field-sizing`、`text-wrap: balance`）直接用并设 `min/max`；② 核心交互用 `@supports` 或极简分支降级，禁臃肿 Polyfill、禁未经授权用单引擎未稳特性。**改造存量代码时保留刻意的 `@supports` 兜底与虚拟滚动测量，禁盲删降级分支。**
+- **原生顶层交互层**：
+  - 模态框用 `<dialog>` + `showModal()`（支持 `closedby="any"` 与原生 `Esc`/焦点锁定；**禁手写 `e.target === dialog` 关窗破坏拖拽选字**，勿重复加 `role="dialog"`/`aria-modal`；SSR 做好 `window`/`HTMLElement` 守卫）；
+  - 菜单/气泡用 `popover` + `popovertarget` + Anchor Positioning（配合 `@starting-style` + `transition-behavior: allow-discrete`）。
+- **表单与 CJK 输入法安全**：
+  - **IME 守卫**：所有 `Enter` 提交输入/textarea **必加 `if (e.isComposing || e.keyCode === 229) return;`**；
+  - **交互后校验**：用 `:user-invalid`/`:user-valid` 同步 `aria-invalid`，**禁裸 `:invalid` 首屏飘红**；
+  - **零重排与原生控件**：多行增高用 `field-sizing: content`（配 `min/max-block-size`，**禁每次输入读 `scrollHeight`**）；补齐标准 `autocomplete`；优先 `accent-color`、`color-scheme`、`<input type="checkbox" switch>` 而非 `div` 假控件。
+- **现代 CSS 架构**：折叠过渡用 `interpolate-size: allow-keywords` / `calc-size()` / Grid `0fr → 1fr`（**禁 `max-height: 9999px`**），页内可查找折叠用 `hidden="until-found"`/`<details>`；组件响应优先 `@container` + `subgrid`；状态联动用 `:has(:checked|:focus-visible|:user-invalid)` 替代 JS 搬运 class；双主题用 `color-scheme: light dark` + `light-dark()`。
+- **Core Web Vitals 与安全**：首屏 LCP 主图设 `fetchpriority="high"`（**禁 `loading="lazy"`**），媒体声明尺寸/`aspect-ratio` 防 CLS；滚动期禁同步重排（延至 `scrollend`），长任务 `scheduler.yield()`，离屏/后台停 `<canvas>`/轮询；外链 CDN 必带 `integrity`（SRI）+ `crossorigin="anonymous"`，不可信 HTML 必经 Sanitizer/Trusted Types（禁裸 `innerHTML`）。
+
+---
+
+## 6. 评审判词与手术调校四动词
+
+先给**独特性判词**：“抽掉品牌名和文案，是否换个同类 Logo 也能套用？”再按病因择一修复：
+- **提纯（Distill）**：砍嵌套卡、冗余边框/色值与可被原生 HTML/CSS 替代的 JS 胶水；Mode A 每屏 1 动作，Mode B 去画布遮挡；
+- **降噪（Quieter）**：收高饱和色与字重冲突，用 tinted gray 与呼吸留白做有观点的克制；
+- **强化（Bolder）**：不加新色/新字，只把已有最强母题、标题尺度与对比拉满并通过 Skeleton Test；
+- **打磨（Polish）**：在 `1440 / 768 / 390` 实测溢出、交互五态、IME 安全、焦点管理、对比度与字体稳定。

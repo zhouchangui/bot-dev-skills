@@ -52,7 +52,7 @@ test('compileSkills builds all 9 bot-* skills + 1 router in pipeline order witho
   assert.match(dshAuto.content, /\.dsh\/bot-stages\/<skill>\/SKILL\.md/);
   assert.match(agentsAuto.content, /\.agents\/skills\/<skill>\/SKILL\.md/);
 
-  // Check DSH router references all 8 stages inside .dsh/bot-stages/
+  // Check DSH router references all 9 stages inside .dsh/bot-stages/
   const dshRouter = result.outputs.find((o) => o.relPath === '.dsh/skills/bot/SKILL.md');
   assert.ok(dshRouter, 'dsh router must exist');
   for (const skill of result.skills) {
@@ -241,6 +241,7 @@ test('rendered skills are self-contained with zero leaked external skill referen
 
   assert.ok(agentsUiCraft && dshUiCraft && claudeUiCraft && dshThink && claudeThink && dshRouter);
   assert.match(agentsUiCraft.content, /Skeleton Test/);
+  assert.match(agentsUiCraft.content, /卡片套卡片/);
   assert.match(agentsUiCraft.content, /cubic-bezier\(0\.23, 1, 0\.32, 1\)/);
   assert.match(agentsThink.content, /\.agents\/skills\/bot-auto\/references\/ui-craft\.md/);
   assert.match(agentsThink.content, /DESIGN\.md/);
@@ -248,12 +249,13 @@ test('rendered skills are self-contained with zero leaked external skill referen
   assert.match(agentsThink.content, /第一性原理必要性审查/);
   assert.match(agentsThink.content, /必要性拆刀（Cut List）/);
   assert.match(agentsThink.content, /Option 0（不做/);
-  assert.match(agentsThink.content, /业务问清楚优先/);
-  assert.match(agentsThink.content, /≤ 4 个独立离散选择题/);
+  assert.match(agentsThink.content, /澄清全正文，闸门可点选/);
+  assert.match(agentsThink.content, /严禁调用交互式提问弹窗/);
   assert.match(agentsThink.content, /正文分组编号清单/);
-  assert.match(claudeThink.content, /AskUserQuestion`（仅用于 ≤4 个独立选择题/);
-  assert.match(dshThink.content, /多选项确认工具仅用于 ≤4 个独立选择题/);
-  assert.match(dshRouter.content, /批量提问（业务问透优先）/);
+  assert.match(claudeThink.content, /`AskUserQuestion` 仅用于硬闸门与最终方案拍板/);
+  assert.match(dshThink.content, /多选项确认工具仅用于硬闸门与最终方案拍板/);
+  assert.match(dshRouter.content, /澄清全正文，闸门可点选/);
+  assert.match(dshRouter.content, /极简反退化四铁律/);
   assert.match(agentsPlan.content, /\.agents\/skills\/bot-auto\/references\/ui-craft\.md/);
   assert.match(agentsPlan.content, /DESIGN\.md/);
   assert.match(agentsPlan.content, /交互五态/);
@@ -263,7 +265,6 @@ test('rendered skills are self-contained with zero leaked external skill referen
   assert.match(dshBuild.content, /\.dsh\/bot-stages\/bot-auto\/references\/ui-craft\.md/);
   assert.match(claudeReview.content, /\.claude\/skills\/bot-auto\/references\/ui-craft\.md/);
   assert.match(agentsReview.content, /维度 D：UI 与交互审计/);
-  assert.match(agentsReview.content, /卡片套卡片/);
   assert.match(agentsReview.content, /独特性判词/);
   assert.match(agentsReview.content, /目标验收矩阵/);
   assert.match(agentsReview.content, /Out of Scope \(Cut List\)/);
@@ -436,8 +437,10 @@ test('workflow refinements, 6 quality guardrails, frontier grilling, and modern 
   // Multi-round Design Tree Frontier grilling in bot-think
   assert.match(think.content, /Design Tree \+ Frontier Rounds/);
   assert.match(think.content, /挑刺概念边界/);
+  assert.match(build.content, /生产实现 \+ 测试替身/);
+  assert.match(review.content, /生产实现 \+ 测试替身/);
   assert.match(think.content, /主动构造极端反例/);
-  assert.match(think.content, /全程禁用 4 题弹窗压缩/);
+  assert.match(think.content, /全程禁用提问弹窗/);
   assert.match(think.content, /❓ \*\*Q1/);
   assert.match(think.content, /➡️ 推荐：/);
   assert.match(think.content, /零静默假设/);
@@ -489,6 +492,13 @@ test('checkSkills and CLI --check detect clean sync, outdated files, stale dirs,
     assert.deepEqual(cleanReport.hosts.sort(), ['agents', 'claude', 'dsh']);
     assert.equal(cleanReport.issues.length, 0);
 
+    // Explicit --hosts claude check on a default symlink-mode repo should check symlinks without throwing
+    const claudeOnlyReport = checkSkills({ sourceDir: srcRoot, targetDir: repoFull, hosts: ['claude'] });
+    assert.equal(claudeOnlyReport.ok, true);
+    assert.equal(claudeOnlyReport.claudeCopy, false);
+    assert.equal(claudeOnlyReport.checkedFiles, 0);
+    assert.equal(claudeOnlyReport.checkedSymlinks, 9);
+
     // Partial install (dsh only, while .agents/skills is a symlink to external global skills like knock-marketing)
     installSkills({ sourceDir: srcRoot, targetDir: repoDshOnly, hosts: ['dsh'] });
     fs.mkdirSync(path.join(repoDshOnly, '.agents'), { recursive: true });
@@ -505,16 +515,25 @@ test('checkSkills and CLI --check detect clean sync, outdated files, stale dirs,
     );
     assert.match(cliOk, /\[OK\]/);
 
-    // Introduce drift (tampered file + stale bot-* directory + broken symlink)
+    // Introduce drift (tampered file + stale bot-* directory + broken symlink including missing bot-auto)
     fs.appendFileSync(path.join(repoFull, '.agents', 'skills', 'bot-auto', 'SKILL.md'), '\n<!-- drift -->\n');
     fs.mkdirSync(path.join(repoFull, '.agents', 'skills', 'bot-legacy-removed'), { recursive: true });
+    fs.unlinkSync(path.join(repoFull, '.claude', 'skills', 'bot-auto'));
     fs.unlinkSync(path.join(repoFull, '.claude', 'skills', 'bot-review'));
 
     const driftReport = checkSkills({ sourceDir: srcRoot, targetDir: repoFull });
     assert.equal(driftReport.ok, false);
+    assert.equal(driftReport.claudeCopy, false);
     assert.ok(driftReport.issues.some((i) => i.kind === 'outdated' && i.relPath === '.agents/skills/bot-auto/SKILL.md'));
     assert.ok(driftReport.issues.some((i) => i.kind === 'stale' && i.relPath === '.agents/skills/bot-legacy-removed'));
+    assert.ok(driftReport.issues.some((i) => i.kind === 'missing' && i.relPath === '.claude/skills/bot-auto'));
     assert.ok(driftReport.issues.some((i) => i.kind === 'missing' && i.relPath === '.claude/skills/bot-review'));
+
+    // Explicit --hosts claude check still detects missing symlinks even when bot-auto symlink is absent
+    const claudeDrift = checkSkills({ sourceDir: srcRoot, targetDir: repoFull, hosts: ['claude'] });
+    assert.equal(claudeDrift.ok, false);
+    assert.equal(claudeDrift.claudeCopy, false);
+    assert.ok(claudeDrift.issues.some((i) => i.kind === 'missing' && i.relPath === '.claude/skills/bot-auto'));
 
     assert.throws(
       () =>
@@ -530,4 +549,29 @@ test('checkSkills and CLI --check detect clean sync, outdated files, stale dirs,
     fs.rmSync(repoDshOnly, { recursive: true, force: true });
     fs.rmSync(externalAgents, { recursive: true, force: true });
   }
+});
+
+test('rendered skills enforce token/size budgets and single-source UI/modern-Web rules without internal leaks', () => {
+  const preambleBytes = fs.statSync(path.join(srcRoot, 'templates', 'preamble.md')).size;
+  const uiCraftBytes = fs.statSync(path.join(srcRoot, 'templates', 'ui-craft.md')).size;
+  assert.ok(preambleBytes <= 1900, `templates/preamble.md too large (${preambleBytes}B > 1900B)`);
+  assert.ok(uiCraftBytes <= 7500, `templates/ui-craft.md too large (${uiCraftBytes}B > 7500B)`);
+
+  const dist = compileSkillsDistribution({ sourceDir: srcRoot });
+  const skillDocs = dist.outputs.filter((o) => o.relPath.endsWith('/SKILL.md'));
+  assert.equal(skillDocs.length, 9);
+
+  let totalSkillBytes = 0;
+  const duplicatedUiSyntax = /(field-sizing: content|interpolate-size: allow-keywords|max-height: 9999px|keyCode === 229|卡片套卡片|\bpreamble\b)/;
+  for (const doc of skillDocs) {
+    const bytes = Buffer.byteLength(doc.content, 'utf8');
+    totalSkillBytes += bytes;
+    assert.ok(bytes <= 8500, `${doc.relPath} exceeds 8500B token budget (${bytes}B)`);
+    assert.equal(
+      duplicatedUiSyntax.test(doc.content),
+      false,
+      `${doc.relPath} duplicates ui-craft.md syntax or leaks internal wording: ${doc.content.match(duplicatedUiSyntax)?.[0]}`,
+    );
+  }
+  assert.ok(totalSkillBytes <= 52000, `Total compiled 9 skills exceed 52000B budget (${totalSkillBytes}B)`);
 });
