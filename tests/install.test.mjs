@@ -8,8 +8,10 @@ import { fileURLToPath } from 'node:url';
 
 import {
   buildSkillsDistribution,
+  checkSkills,
   compileSkills,
   compileSkillsDistribution,
+  computeSourceVersion,
   installSkills,
   safetyGuard,
 } from '../lib/compiler.mjs';
@@ -404,5 +406,84 @@ test('skills.sh distribution in skills/ is in sync with templates/ and self-cont
     assert.equal(fs.existsSync(path.join(tmpSrc, 'skills', 'bot-stale-old')), false);
   } finally {
     fs.rmSync(tmpSrc, { recursive: true, force: true });
+  }
+});
+
+test('workflow refinements: resume sniffing, review read-only repo access, One-way door, Touched Paths, and UI modes are rendered', () => {
+  const result = compileSkills({
+    sourceDir: srcRoot,
+    hosts: ['agents'],
+  });
+
+  const auto = result.outputs.find((o) => o.relPath === '.agents/skills/bot-auto/SKILL.md');
+  const plan = result.outputs.find((o) => o.relPath === '.agents/skills/bot-plan/SKILL.md');
+  const review = result.outputs.find((o) => o.relPath === '.agents/skills/bot-review/SKILL.md');
+  const uiCraft = result.outputs.find((o) => o.relPath === '.agents/skills/bot-auto/references/ui-craft.md');
+
+  assert.match(auto.content, /断点续跑嗅探（Resume First）/);
+  assert.match(auto.content, /Touched Paths/);
+  assert.match(auto.content, /单装兜底/);
+  assert.match(plan.content, /One-way door/);
+  assert.match(plan.content, /Touched Paths:/);
+  assert.match(review.content, /开放代码库只读检索/);
+  assert.match(review.content, /不可逆变更保护（One-way door）/);
+  assert.match(uiCraft.content, /Mode A: Marketing \/ Persuade/);
+  assert.match(uiCraft.content, /Mode B: App \/ Workbench/);
+});
+
+test('checkSkills and CLI --check detect clean sync, outdated files, stale dirs, and auto-detect partial hosts', () => {
+  const repoFull = makeTempDir('bot-check-full-');
+  const repoDshOnly = makeTempDir('bot-check-dsh-');
+  const externalAgents = makeTempDir('bot-check-ext-agents-');
+  try {
+    const ver1 = computeSourceVersion(srcRoot);
+    assert.match(ver1.stamp, /^v\d+\.\d+\.\d+\+[0-9a-f]{12}$/);
+
+    installSkills({ sourceDir: srcRoot, targetDir: repoFull, hosts: ['dsh', 'agents', 'claude'] });
+    const cleanReport = checkSkills({ sourceDir: srcRoot, targetDir: repoFull });
+    assert.equal(cleanReport.ok, true);
+    assert.deepEqual(cleanReport.hosts.sort(), ['agents', 'claude', 'dsh']);
+    assert.equal(cleanReport.issues.length, 0);
+
+    // Partial install (dsh only, while .agents/skills is a symlink to external global skills like knock-marketing)
+    installSkills({ sourceDir: srcRoot, targetDir: repoDshOnly, hosts: ['dsh'] });
+    fs.mkdirSync(path.join(repoDshOnly, '.agents'), { recursive: true });
+    fs.symlinkSync(externalAgents, path.join(repoDshOnly, '.agents', 'skills'));
+    const dshOnlyReport = checkSkills({ sourceDir: srcRoot, targetDir: repoDshOnly });
+    assert.equal(dshOnlyReport.ok, true);
+    assert.deepEqual(dshOnlyReport.hosts, ['dsh']);
+
+    // CLI --check passes across multiple targets when in sync
+    const cliOk = execFileSync(
+      process.execPath,
+      [path.join(srcRoot, 'scripts', 'install.mjs'), '--check', '--target', repoFull, '--target', repoDshOnly],
+      { encoding: 'utf8' },
+    );
+    assert.match(cliOk, /\[OK\]/);
+
+    // Introduce drift (tampered file + stale bot-* directory + broken symlink)
+    fs.appendFileSync(path.join(repoFull, '.agents', 'skills', 'bot-auto', 'SKILL.md'), '\n<!-- drift -->\n');
+    fs.mkdirSync(path.join(repoFull, '.agents', 'skills', 'bot-legacy-removed'), { recursive: true });
+    fs.unlinkSync(path.join(repoFull, '.claude', 'skills', 'bot-review'));
+
+    const driftReport = checkSkills({ sourceDir: srcRoot, targetDir: repoFull });
+    assert.equal(driftReport.ok, false);
+    assert.ok(driftReport.issues.some((i) => i.kind === 'outdated' && i.relPath === '.agents/skills/bot-auto/SKILL.md'));
+    assert.ok(driftReport.issues.some((i) => i.kind === 'stale' && i.relPath === '.agents/skills/bot-legacy-removed'));
+    assert.ok(driftReport.issues.some((i) => i.kind === 'missing' && i.relPath === '.claude/skills/bot-review'));
+
+    assert.throws(
+      () =>
+        execFileSync(
+          process.execPath,
+          [path.join(srcRoot, 'scripts', 'install.mjs'), '--check', '--target', repoFull],
+          { encoding: 'utf8' },
+        ),
+      /Command failed/i,
+    );
+  } finally {
+    fs.rmSync(repoFull, { recursive: true, force: true });
+    fs.rmSync(repoDshOnly, { recursive: true, force: true });
+    fs.rmSync(externalAgents, { recursive: true, force: true });
   }
 });

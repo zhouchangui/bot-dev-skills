@@ -24,7 +24,7 @@ description: "Ship workflow: sync base branch, re-run full verification, update 
 3. **证据驱动交付摘要**：
    - 简述改动动机与范围；
    - 附上最小实测输出摘要（命令输出、Before/After 对比）；
-   - 明确标出本次属于 **Two-way door（可逆）** 还是 **One-way door（不可逆/迁移/破环性变更）**。
+   - 复核 `/bot-plan` 标定的 **Two-way door（可逆）** 或 **One-way door（不可逆/迁移/破坏性变更）**：若属 `One-way door`，明确附上兼容迁移与回滚验证结论。
 4. **硬闸门 #3（发布与合并必须询问）**：
    - 在执行 `git push`、创建/合并 PR、触发发版打包或部署上线前，**必须暂停并向用户明确展示目标分支、提交摘要与命令，获得确认后再执行**。
 

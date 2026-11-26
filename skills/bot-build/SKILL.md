@@ -25,8 +25,9 @@ description: "Implement vertical slices with strict minimalism (reuse ladder, Ru
 
 ## 开工前硬检查
 
-1. **分支 / Worktree 闸门（硬闸门 #2）**：
+1. **分支 / Worktree 与并发隔离闸门（硬闸门 #2）**：
    - 如需要新建分支或 worktree（`git checkout -b` / `git switch -c` / `git worktree add`），**必须先问用户确认分支名与基线**；未经同意严禁私自切换或建 worktree。
+   - 若多切片并行实现，必须先核对各票据 `Touched Paths` 无交集或已在各自独立 `git worktree` 中隔离，严禁多个代理在同一工作区并发改写共享文件。
 2. **写前复用阶梯（按顺序止步）**：
    - ① 本仓库已有 helper / 模式 → ② 语言标准库 → ③ 平台原生特性 → ④ 已安装依赖。
    - 只有在第 ①–④ 步都确认无法直接满足时，才自己写新代码；**严禁未经确认新增第三方依赖**。
@@ -42,7 +43,7 @@ description: "Implement vertical slices with strict minimalism (reuse ladder, Ru
    - 一旦看清公共接缝，清理多余试验代码，按路径 1 补上接缝测试后再落正式实现。
 3. **前端 UI 视觉 / 静态装配（状态与展示分离）**：
    - 把状态流转、筛选、派生计算抽成纯函数走路径 1 的接缝单测；
-   - 实现布局、样式与交互前**先读 `references/ui-craft.md`**：严格复用 `DESIGN.md` / 既有样式 token，落实五态、真实文案/真实产品画面、微排版（`-0.02em`、行宽控制、`tabular-nums`）、同心圆角、tinted grays（彩底禁灰字）与浏览面定制（`::selection` / 焦点环 / 滚动条）；
+   - 实现布局、样式与交互前**先读 `references/ui-craft.md`（若路径以 `references/` 开头则相对于本 `SKILL.md` 所在目录解析）**：严格复用 `DESIGN.md` / 既有样式 token，按界面所属模式（Marketing 叙事面 vs Workbench 工具台面）落实五态、真实文案/真实产品画面、微排版（`-0.02em`、行宽控制、`tabular-nums`）、同心圆角、tinted grays（彩底禁灰字）与浏览面定制（`::selection` / 焦点环 / 滚动条）；
    - 交互动效统一采用 `ease-out`（`cubic-bezier(0.23,1,0.32,1)`，`scale(0.97)` 按下回弹、触发点 `transform-origin`、只动画 `transform`/`opacity`、仅 `fixed`/`sticky` 层用 `backdrop-blur`、每容器单次入场），**不写脆弱的 DOM/CSS 快照测试**，界面靠 `/bot-verify` 实跑验收。
 
 ## 写后收尾
@@ -50,4 +51,4 @@ description: "Implement vertical slices with strict minimalism (reuse ladder, Ru
 1. **写后冗余自检（极简红线）**：
    - 检查是否违反 **三次法则（Rule of Three）**（不足 3 处真实重复却提前抽了工厂/策略/配置层）。
    - 检查是否引入纯转发函数（Middle Man）或 >2 个纯胶水文件，若出现立刻内联化简。
-2. **收尾自测**：跑通受影响文件测试与项目级检查（项目 typecheck/test），准备进入 `/bot-review`。
+2. **收尾自测与状态回写**：跑通受影响文件测试与项目级检查（项目 typecheck/test）；若当前任务存在规格票据（项目 `.scratch/` 或 issue tracker），同步更新对应切片状态，准备进入 `/bot-review`。

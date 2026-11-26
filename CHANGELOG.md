@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added / Changed
+- **新增模板版本指纹与多仓漂移巡检（`lib/compiler.mjs`、`scripts/install.mjs`）**：基于原生 `node:crypto` 计算模板与宿主配置指纹（`computeSourceVersion`），新增零磁盘写入的 `checkSkills` 与 `install.mjs --check`（支持多 `--target` 批量巡检、自动识别已装宿主并跳过外部目录软链与受保护路径）。
+- **补齐流水线实战容错与双模式 UI 分流（`templates/bot-*`、`templates/ui-craft.md`）**：为 `/bot-auto` 增加断点续跑嗅探（Resume First）、M 级账本落盘、L 级 `Touched Paths` 并发隔离条件与单装降级兜底；为 `/bot-review` 冷视角子代理开放代码库只读检索及 `AGENTS.md`/`DESIGN.md` 读取权限；将 `One-way door` 不可逆变更识别与回滚方案前移至 `/bot-plan`；在 `ui-craft.md` 拆出 `Mode A: Marketing / Persuade` 与 `Mode B: App / Workbench` 双模式基准。
 - **原生支持 `skills.sh`（`npx skills add zhouchangui/bot-dev-skills`）一键安装**：将原始模板迁移至 `templates/`（`SKILL.tmpl.md` 防误扫描），新增 `npm run build:skills`（`scripts/build-skills.mjs`）编译生成零占位符、自包含 `references/ui-craft.md` 与便携路径（`../<skill>/SKILL.md`）的标准 `skills/` 分发目录，并在单测中强制校验 `templates/` ↔ `skills/` 字节级一致性；同步更新 `README.md` 与安装说明。
 - **内嵌第一性原理功能必要性审查（`/bot-think`、`/bot-auto`、`/bot-plan`、`/bot-review`）**：把 `/bot-think` 前提挑战升级为“剥离表层方案还原根目标 + 减法四问 + Must-Have/Cut List 拆刀 + 存疑时强制保留 `Option 0（不做/删改/零代码替代）`”，在 `/bot-auto` 中要求 S 级新增功能/入口/开关也必须先过 30 秒必要性速审，并在 `docs/designs/`、`spec.md` 与 `/bot-review` 的 `Scope Creep` 审计间贯通 `Necessity / Why` 与 `Out of Scope (Cut List)`。
 - **升级 `/bot-auto` 与 `/bot-review` 为有界“验证 ⇄ 审查 ⇄ 修复”质量收敛闭环**：新增显式目标验收矩阵（`AC-1..N`）、`P0/P1/P2` 严重级分流（P0 必修、P1 预算内主动质量抬升、P2 只记不改）、反作弊红线（禁删测/弱化断言）、独立冷视角审查（支持子代理宿主对 M/L 级默认派干净上下文独立子代理，单代理宿主优雅降级）、自适应轮次预算（`S ≤ 2 / M·L ≤ 3`，深度打磨口令可放宽至 `≤ 5`）+ 双熔断 + 硬退出门槛，并为 L 级多切片任务启用“切片内测 + 全局收敛外环”与账本落盘。
