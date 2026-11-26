@@ -31,7 +31,7 @@
 | --- | --- | --- | --- |
 | `bot` | 总路由（DSH） | 列出阶段地图与铁律，按路径按需直读 | — |
 | `/bot-auto` | 0. 全流程自动编排 | 断点嗅探续跑 + 按 S/M/L 智能跳步并串起全流程，**内置有界 `Verify ⇄ Review ⇄ Fix` 质量收敛闭环（含目标验收矩阵、M/L 账本落盘、P0/P1/P2 分级、双熔断与 L 级并发隔离）** | **统一守三道闸门** |
-| `/bot-think` | 1. 构思与澄清 | **第一性原理功能必要性审查（反 XY Problem / 减法四问 / Cut List / Option 0）**、批量澄清、**双模式设计系统定调（Marketing vs Workbench，`DESIGN.md`/HTML 预览）**、2–3 套备选方案、ADR/设计落盘 | **闸门 #1** |
+| `/bot-think` | 1. 构思与澄清 | **第一性原理功能必要性审查（反 XY Problem / 减法四问 / Cut List / Option 0）**、**决策树多轮前沿深度追问（术语挑刺 + 极端场景拷问 + 零静默假设）**、**双模式设计系统定调（Marketing vs Workbench，`DESIGN.md`/HTML 预览）**、2–3 套备选方案、`GLOSSARY.md`/ADR/设计落盘 | **闸门 #1** |
 | `/bot-plan` | 2. 规格与切片 | 接口深审、**前置 `One-way door` 识别**、ASCII 数据流与故障点、**UI 双模式五态 / Skeleton Test / 动效角色规划**、测试接缝、带 `Touched Paths` 的垂直切片 | **闸门 #1**（新增大改时） |
 | `/bot-build` | 3. 极简实现（TDD 分流） | 复用阶梯 + 接缝 TDD / Spike 探索 / **UI 状态分离与微动效工艺落地** + 并发写冲突隔离 + 写后去冗余 | **闸门 #2**（建分支前） |
 | `/bot-debug` | 4. 根因调试 | 先复现稳定红灯 → 单一公共根因点修复 → 回归锁定 | — |

@@ -215,7 +215,7 @@ test('rendered skills are self-contained with zero leaked external skill referen
     claudeCopy: true,
   });
 
-  const forbidden = /\b(gstack|mattpocock|ponytail|grill-me|plan-eng-review|plan-design-review|design-review|design-consultation|to-spec|to-tickets|codebase-design|document-release|diagnosing-bugs|office-hours|TODOS\.md|taste-skill|impeccable|emil-design-eng|frontend-design|ui-ux-pro-max|modern-web-guidance)\b/i;
+  const forbidden = /\b(gstack|mattpocock|ponytail|grill-me|grill-with-docs|plan-eng-review|plan-design-review|design-review|design-consultation|to-spec|to-tickets|codebase-design|document-release|diagnosing-bugs|office-hours|TODOS\.md|taste-skill|impeccable|emil-design-eng|frontend-design|ui-ux-pro-max|modern-web-guidance)\b/i;
   for (const out of result.outputs) {
     assert.equal(
       forbidden.test(out.content),
@@ -409,18 +409,28 @@ test('skills.sh distribution in skills/ is in sync with templates/ and self-cont
   }
 });
 
-test('workflow refinements, 6 quality guardrails, and modern native Web rules are rendered', () => {
+test('workflow refinements, 6 quality guardrails, frontier grilling, and modern native Web rules are rendered', () => {
   const result = compileSkills({
     sourceDir: srcRoot,
     hosts: ['agents'],
   });
 
   const auto = result.outputs.find((o) => o.relPath === '.agents/skills/bot-auto/SKILL.md');
+  const think = result.outputs.find((o) => o.relPath === '.agents/skills/bot-think/SKILL.md');
   const plan = result.outputs.find((o) => o.relPath === '.agents/skills/bot-plan/SKILL.md');
   const build = result.outputs.find((o) => o.relPath === '.agents/skills/bot-build/SKILL.md');
   const review = result.outputs.find((o) => o.relPath === '.agents/skills/bot-review/SKILL.md');
   const verify = result.outputs.find((o) => o.relPath === '.agents/skills/bot-verify/SKILL.md');
   const uiCraft = result.outputs.find((o) => o.relPath === '.agents/skills/bot-auto/references/ui-craft.md');
+
+  // Multi-round Design Tree Frontier grilling in bot-think
+  assert.match(think.content, /Design Tree \+ Frontier Rounds/);
+  assert.match(think.content, /挑刺概念边界/);
+  assert.match(think.content, /主动构造极端反例/);
+  assert.match(think.content, /全程禁用 4 题弹窗压缩/);
+  assert.match(think.content, /❓ \*\*Q1/);
+  assert.match(think.content, /➡️ 推荐：/);
+  assert.match(think.content, /零静默假设/);
 
   // Workflow resilience & UI modes
   assert.match(auto.content, /断点续跑嗅探（Resume First）/);
