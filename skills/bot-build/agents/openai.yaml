@@ -1,3 +1,3 @@
 interface:
   display_name: "bot-build · 极简实现（TDD 分流）"
-  short_description: "Implement vertical slices with strict minimalism (reuse ladder, Rule of Three, zero glue bloat) and smart TDD routing (s"
+  short_description: "Implement vertical slices with architectural consistency, deep-module boundaries, strict minimalism (reuse ladder, delet"

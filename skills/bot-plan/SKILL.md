@@ -1,11 +1,11 @@
 ---
 name: bot-plan
-description: "Turn aligned design into executable spec, tracer-bullet vertical slices with blocking edges, data-flow failure analysis, UI design checks when UI is touched, and test seams. Use for: plan feature, write spec, split tickets, bot plan."
+description: "Turn aligned design into executable spec, tracer-bullet vertical slices with blocking edges, deep-module & consistency checks, data-flow failure analysis, UI design checks when UI is touched, and test seams. Use for: plan feature, write spec, split tickets, bot plan."
 ---
 
 # /bot-plan — 规格、工程深审与纵向切片
 
-目标：把已对齐的想法拆成**可独立验证的纵向切片（Tracer Bullets）**，在写代码前锁死数据流、不可逆风险（One-way door）、热路径复杂度、失败模式、UI 交互态（若涉及界面）与公共测试接缝（Seam）。
+目标：把已对齐的想法拆成**可独立验证的纵向切片（Tracer Bullets）**，在写代码前锁死同构架构一致性、深模块边界、数据流、不可逆风险（One-way door）、热路径复杂度、失败模式、UI 交互态（若涉及界面）与公共测试接缝（Seam）。
 
 ## 通用流控与极简铁律
 
@@ -26,8 +26,9 @@ description: "Turn aligned design into executable spec, tracer-bullet vertical s
 
 ## 执行步骤
 
-1. **接口深度、门型识别、复杂度与故障检查**：
-   - 优先复用已有接缝与深模块（少接口、高内聚），警惕浅模块、信息泄露、纯透传函数与手同步双份清单。
+1. **同构对齐、深模块标尺、门型识别与故障检查**：
+   - **同构一致性基线（Consistency First）**：先对照同域既有标杆模块、`GLOSSARY.md` 与 `docs/adr/`，对齐项目的目录分层、错误返回结构、状态归属与领域名词，**严禁无故引入第二套平行架构风格或违背既有 ADR 决议**。
+   - **深模块删除检验（Deletion Test）与单适配器禁令**：追求**窄接口藏复杂行为**（同时提升调用方杠杆率 Leverage 与维护局部性 Locality，公开契约须说清类型、不变量、时序约束与错误模式）。对拟新建或拆分的模块做**删除检验**——假想删掉它，若复杂度凭空消失说明是浅层透传壳（不建），若复杂度散落回多处调用方才值得独立；**严禁单纯为测内部步骤而把内聚逻辑拆成碎函数**；**1 个适配器仅算假想接缝，只有真实存在 2 个及以上适配器（如生产实现 + 测试替身/第二渠道）才切接缝**。
    - **前置标定 `Two-way door` vs `One-way door`**：明确判定本次改动是否包含**不可逆/高迁移成本变更（`One-way door`：DB Schema 删改列、本地持久化格式变更、公开 API 破坏性变更或权限模型调整）**；凡属 `One-way door`，必须在规格中写明兼容演进路径（Expand–Contract）、旧数据回填/兼容读取与回滚验证方案。
    - **数据规模与热路径预审**：评估真实数据量级，提前规避循环内串行 I/O / N+1 查询、大集合嵌套扫描（`O(N²)`）与无上限全量同步读入内存。
    - 用简明 ASCII 图画出核心数据流/状态流，并为每条新路径标出**至少 1 个真实生产故障点**及其错误处理/可观测性（禁止静默吞错或用假默认值掩盖契约异常）。
@@ -36,8 +37,9 @@ description: "Turn aligned design into executable spec, tracer-bullet vertical s
    - **交互五态与输入安全补齐**：明确规格中的**空态（Empty，含引导动作）、加载态（Loading）、错态（Error + `:user-invalid` 交互后校验 + 可恢复路径）、长文本/极大数据溢出（Overflow）与首次使用引导**；凡含回车提交的输入框明确标注中文/CJK 输入法 `isComposing` 守卫。
    - **屏幕节奏 / 工作区密度、Skeleton Test 与动效角色**：Mode A 按 `min-h-[100dvh]` 1 屏 1 观点与全页对齐边界组织叙事（首屏 LCP 主图禁懒加载并锁定宽高比防 CLS），Mode B 优先保障主工作区首屏面积、固定壳层独立滚动与高频键盘流（禁套营销页 `py-24` 大留白）；统一通过**无文案骨架校验（Skeleton Test）**，并为有动效的区域划分 **Lead / Support / Decoration / Static**（坚持每容器单次入场、高频操作零延迟零 stagger）。
    - **响应式与可达性（A11y）**：说明桌面/平板/手机多断点与容器级布局意图（非简单纵向堆叠）、原生焦点管理、清晰 `:focus-visible` 焦点环、对比度（严禁彩底灰字）与 `rem` 缩放兼容。
-3. **测试接缝与跨层契约锁定（Seam & Round-Trip First）**：
-   - 在写测试前，明确写出每个关键路径的**公共边界接缝（Seam）**、断言目标（保护什么不变量、什么回归会让它失败）与测试类型（单测 / 集成 / E2E）。
+3. **测试接缝、四档依赖与跨层契约锁定（Seam & Round-Trip First）**：
+   - **公开接口即测试面（The interface is the test surface）**：明确写出每个关键路径的**公共边界接缝（Seam）**与断言目标（业务调用方与测试穿过同一公开接口，若想绕过接口测内部私有步骤说明模块边界切错了）。
+   - **按四档依赖性质定接缝策略**：① **进程内纯计算/内存状态** → 合并进深模块直接测公开接口，零 Adapter；② **本地可替代依赖（内存库 / SQLite / 临时目录）** → 跑真实本地替身，不写假 Mock；③ **自有跨网络服务** → 定义窄接口，单测注入内存 Fake 并配跨层往返测试；④ **外部第三方服务** → 注入窄接口，单测提供 Mock 替身。
    - **跨层契约往返要求**：凡同时改动生产方与消费方（前后端字段、序列化读写、CLI 参数），必须规划至少 1 条**不 Mock 该契约边界的真实往返测试（Round-trip Test）**。
 4. **自包含规格与纵向切片拆票**：
    - 每个 ticket 必须是从输入到输出可独立跑通验证的**垂直切片**（不要按“全做 schema → 全做 API → 全做 UI”横向切片）。

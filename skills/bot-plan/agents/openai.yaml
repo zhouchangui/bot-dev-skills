@@ -1,3 +1,3 @@
 interface:
   display_name: "bot-plan · 规格与切片"
-  short_description: "Turn aligned design into executable spec, tracer-bullet vertical slices with blocking edges, data-flow failure analysis,"
+  short_description: "Turn aligned design into executable spec, tracer-bullet vertical slices with blocking edges, deep-module & consistency c"

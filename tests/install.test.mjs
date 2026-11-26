@@ -215,7 +215,7 @@ test('rendered skills are self-contained with zero leaked external skill referen
     claudeCopy: true,
   });
 
-  const forbidden = /\b(gstack|mattpocock|ponytail|grill-me|grill-with-docs|plan-eng-review|plan-design-review|design-review|design-consultation|to-spec|to-tickets|codebase-design|document-release|diagnosing-bugs|office-hours|TODOS\.md|taste-skill|impeccable|emil-design-eng|frontend-design|ui-ux-pro-max|modern-web-guidance)\b/i;
+  const forbidden = /\b(gstack|mattpocock|ponytail|grill-me|grill-with-docs|improve-codebase-architecture|plan-eng-review|plan-design-review|design-review|design-consultation|to-spec|to-tickets|codebase-design|document-release|diagnosing-bugs|office-hours|TODOS\.md|taste-skill|impeccable|emil-design-eng|frontend-design|ui-ux-pro-max|modern-web-guidance)\b/i;
   for (const out of result.outputs) {
     assert.equal(
       forbidden.test(out.content),
@@ -419,9 +419,19 @@ test('workflow refinements, 6 quality guardrails, frontier grilling, and modern 
   const think = result.outputs.find((o) => o.relPath === '.agents/skills/bot-think/SKILL.md');
   const plan = result.outputs.find((o) => o.relPath === '.agents/skills/bot-plan/SKILL.md');
   const build = result.outputs.find((o) => o.relPath === '.agents/skills/bot-build/SKILL.md');
+  const debug = result.outputs.find((o) => o.relPath === '.agents/skills/bot-debug/SKILL.md');
   const review = result.outputs.find((o) => o.relPath === '.agents/skills/bot-review/SKILL.md');
   const verify = result.outputs.find((o) => o.relPath === '.agents/skills/bot-verify/SKILL.md');
   const uiCraft = result.outputs.find((o) => o.relPath === '.agents/skills/bot-auto/references/ui-craft.md');
+
+  // Architectural consistency, Deep-Module Deletion Test, 4-tier seam strategy & Locality Guard
+  assert.match(build.content, /同构一致性侦察/);
+  assert.match(build.content, /跨过其他模块的公开入口/);
+  assert.match(build.content, /公开接口即测试面/);
+  assert.match(build.content, /删除检验（Deletion Test）/);
+  assert.match(plan.content, /按四档依赖性质定接缝策略/);
+  assert.match(debug.content, /浅模块泥潭信号/);
+  assert.match(review.content, /架构同构一致性与封装边界/);
 
   // Multi-round Design Tree Frontier grilling in bot-think
   assert.match(think.content, /Design Tree \+ Frontier Rounds/);
