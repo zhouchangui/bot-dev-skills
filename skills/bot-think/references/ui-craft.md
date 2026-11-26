@@ -1,4 +1,4 @@
-# UI 与官网设计工艺参考（仅在涉及界面/官网/样式/交互时按需加载）
+# UI 与现代 Web 工程工艺参考（仅在涉及界面/官网/样式/交互时按需加载）
 
 > 适用场景：Web 官网、营销着陆页（Persuade）及产品前端界面（App / Workbench）。纯后端/CLI 任务勿读，保持零开销。
 
@@ -17,7 +17,7 @@
   - 一套界面只选**一种**层次区分方式（背景色阶差 / 极细描边 / 极柔和阴影 三选一），不混用。
   - 严禁手绘感涂鸦 SVG、图片下方多余解释图注、或强行把多步骤/详情页全塞进 Modal。
 - **同心圆角几何**：外层壳与内层容器保持 `innerRadius = outerRadius - padding`，避免内外圆角打架。
-- **浏览面完整打磨**：必须同步定制 `::selection`、`caret-color`、滚动条样式与清晰 `:focus-visible` 焦点环（不能靠浏览器默认蓝框）。
+- **浏览面完整打磨**：必须同步定制 `::selection`、`caret-color`、滚动条样式（`scrollbar-color` / `scrollbar-gutter`）与清晰 `:focus-visible` 焦点环（不能靠浏览器默认蓝框），并兼容高对比度偏好。
 - **色彩秩序**：中性灰须带轻微品牌色相倾向（Tinted Grays），避免死板纯灰；**严禁在彩色背景上放置灰色文字**（改用同色相的深/浅阶）。
 
 ---
@@ -37,7 +37,7 @@
 ### 2B. 产品应用 / 高密度工作台（Mode B: App / Workbench）
 
 - **主画布与有效密度优先**：把首屏视口留给主工作区（画布、时间轴、编辑器、数据表或核心任务面板），**禁止照搬营销页的 `min-h-[100dvh]` 分屏叙事与 `py-24` 大留白推挤有效操作区**。
-- **壳层锁定与独立滚动**：高频工作台采用固定导航/工具壳层 + 内容面板独立滚动（长列表按需虚拟化），避免整页长滚动导致工具条与上下文丢失。
+- **壳层锁定与独立滚动**：高频工作台采用固定导航/工具壳层 + 内容面板独立滚动（长列表按需虚拟化或设 `content-visibility: auto`），避免整页长滚动导致工具条与上下文丢失。
 - **键盘流与就地反馈**：高频筛选、面板折叠、命令切换与提交必须支持键盘直达（清晰焦点环 + 快捷键提示），状态反馈就地呈现，禁止用全屏成功页或多余确认弹窗打断连续操作。
 - **紧凑基线与防跳动**：工具栏、属性栏与数据列保持紧凑网格步进（如 `4px / 8px`），动态数值与状态徽章固定槽位宽度（配合 `tabular-nums`）防止操作时界面抖动。
 
@@ -49,13 +49,13 @@
 
 ## 3. 排版微雕与细节数值
 
-- **角色字栈**：明确区分 Display（视觉张力）、Body/UI（高可读性）、Mono/数字（精确对齐），禁止回退至无意识系统裸字栈。
+- **角色字栈与防闪烁回退**：明确区分 Display（视觉张力）、Body/UI（高可读性）、Mono/数字（精确对齐），禁止回退至无意识系统裸字栈；自定义字体配置 `size-adjust` / `font-size-adjust` 保持字体切换时视觉尺寸稳定，全站采用 `rem` 尊重系统字号缩放偏好。
 - **微排版校准**：
-  - 大标题适度收紧字距（英文如 `-0.02em`，行高 `1.15–1.3`）；
-  - 正文控制最佳行宽（英文 `<= 65ch`，中文约 `30–40` 字/行，行高 `1.65–1.8`）；
+  - 大标题适度收紧字距（英文如 `-0.02em`，行高 `1.15–1.3`）并启用 `text-wrap: balance` 均衡断行；
+  - 正文控制最佳行宽（英文 `<= 65ch`，中文约 `30–40` 字/行，行高 `1.65–1.8`）并启用 `text-wrap: pretty`；
   - 数据、价格、指标与对比列统一开启 `font-variant-numeric: tabular-nums`；
   - 减少滥用极粗字重（如将全页 `900`/`700` 下调为 `600`/`500`，用尺度和空间拉开层级）。
-- **高级渐变（Eased Gradients）**：遮罩与背景渐变采用多停靠点非均匀插值（ease-in-out 透明度曲线），消除两色线性渐变的生硬分割线。
+- **高级渐变与现代色域**：优先在 `oklch` 等感知均匀色域做色阶插值，遮罩与背景渐变采用多停靠点非均匀插值（ease-in-out 透明度曲线），消除两色线性渐变的生硬灰暗分割线。
 
 ---
 
@@ -68,15 +68,39 @@
   1. **角色分配**：先划分 `Lead`（唯一主角，幅度最大先动）→ `Support`（从属短距跟进）→ `Decoration`（仅淡入不位移）→ `Static`（容器与无关区域保持静止）；
   2. **每容器单次入场**：容器整体滑入时，内部元素必须已就位；**严禁外层入场 + 子列表二次 stagger 延迟**；
   3. **高频场景零动画**：高频菜单、命令面板、Tab 切换、重复键盘操作严禁加延迟或 stagger；仅官网首屏等首次访问时刻可使用非线性波浪错峰（`100–150ms` 递进，总时长约 `0.5–0.6s`，严禁等距“节拍器”）；
-  4. **GPU 与可中断性**：仅对 `transform` 与 `opacity` 做动画（轻量 `blur(2px)` 配合淡入需节制）；`backdrop-blur` 只准挂在 `fixed`/`sticky` 导航或遮罩层，严禁用于大面积滚动内容；退场元素立即脱离布局流（`position: absolute` / 独立层）让相邻元素同步补位，且所有动效必须支持中途打断与 `prefers-reduced-motion`。
+  4. **GPU 与可中断性**：仅对 `transform`（或独立 `translate`/`scale`/`rotate` 属性）与 `opacity` 做动画；`backdrop-blur` 只准挂在 `fixed`/`sticky` 导航或遮罩层，严禁用于大面积滚动内容；退场元素立即脱离布局流（`position: absolute` / Top Layer）让相邻元素同步补位，且所有动效必须支持中途打断与 `prefers-reduced-motion`。
 
 ---
 
-## 5. 评审与手术调校四动词
+## 5. 现代 Web 原生平台优先（反历史 JS Hack 与渐进增强）
+
+AI 训练语料充斥早期手写 JS 补丁。编写或改造 Web 界面时，优先采用跨主流浏览器互通的 **Baseline 原生 HTML / CSS 能力**，淘汰脆弱的命令式 Hack：
+
+- **兼容基线与渐进增强分流（Baseline First）**：
+  - 未显式声明浏览器策略时，默认选用 **Baseline Widely Available** 特性；使用较新原生特性（Newly Available）时按风险分流：① **忽略即安全退化类**（如 `field-sizing: content`、`text-wrap: balance`）直接声明并配好 `min/max` 尺寸边界；② **核心交互必保类**用 `@supports` 或极简条件分支降级，严禁引入臃肿 Polyfill 库；未经用户明确授权禁止使用单引擎未稳定特性或 Origin Trial。
+  - **改造存量代码防误伤**：清理旧写法前先核对上下文，保留刻意的 `@supports` 兼容兜底与虚拟滚动测量逻辑，严禁为追求表面“零旧写法”盲删安全降级分支。
+- **原生顶层交互层（`<dialog>` 与 `popover` 替代手写遮罩监听）**：
+  - 模态对话框优先用原生 `<dialog>` + `showModal()`（支持 `<dialog closedby="any">` 轻点外侧关闭与平台原生 `Esc`/返回手势，自动锁定焦点与背景惰性；**严禁手写 `e.target === dialog` 点击关窗逻辑破坏框选文本拖拽**，也勿在原生 `<dialog>` 上重复堆砌 `role="dialog"` / `aria-modal`）。
+  - 菜单、气泡、提示卡优先用声明式 `popover` + `popovertarget`（配合 CSS Anchor Positioning 自动翻转防视口裁切，用 `@starting-style` + `transition-behavior: allow-discrete` 实现进出 Top Layer 过渡），少写命令式开关监听器；在 React 等框架中对非受控 ref 调用 `showModal()` 并做好 SSR `window`/`HTMLElement` 守卫。
+- **现代原生表单与中文 / CJK 输入法安全（高频必查）**：
+  - **IME 输入法回车守卫**：所有监听 `Enter` 提交的输入框与 `textarea`（聊天、搜索、行内重命名），**必须加 `if (e.isComposing || e.keyCode === 229) return;` 守卫**，严防中文/日韩输入法选词上屏瞬间误触发提交。
+  - **交互后校验反馈**：用 `:user-invalid` / `:user-valid`（并与屏幕阅读器 `aria-invalid` 同步）仅在用户交互后展示错误态，**严禁使用裸 `:invalid` 导致页面初载或输入半截时提前满屏标红**。
+  - **零重排自适应与原生控件**：多行输入自动增高优先用 CSS `field-sizing: content`（配 `min-block-size` / `max-block-size`），**严禁每次输入读取 `scrollHeight` 强制同步重排**；登录、注册、支付、地址与短信验证码表单补齐标准 `autocomplete` 属性；复选框/滑块/进度条优先用 `accent-color`、`color-scheme` 与原生 `<input type="checkbox" switch>` 渐进增强，而非用 `div` 重造失焦假控件。
+- **现代 CSS 架构替代魔法数字与状态胶水**：
+  - **固有尺寸过渡**：折叠面板/手风琴用 `interpolate-size: allow-keywords`、`calc-size()` 或 Grid `0fr → 1fr` 动画，**严禁写 `max-height: 9999px` 假动画导致缓动失真**；需要支持浏览器页内查找（`Cmd/Ctrl+F`）的折叠内容优先用 `hidden="until-found"` 或 `<details>`。
+  - **容器查询与关系选择器**：组件自适应优先用 `@container` 容器查询与 `subgrid` 而非全局视口硬断点；父容器随子表单/勾选态变样式用 `:has(:checked)` / `:has(:focus-visible)` / `:has(:user-invalid)`，**禁止为此写 JS 往父节点搬运状态 class**；明暗双主题用 `color-scheme: light dark` 配合 `light-dark()` 消除重复的 `@media (prefers-color-scheme: dark)` 块。
+- **Core Web Vitals（LCP / INP / CLS）与前端安全护栏**：
+  - **LCP / CLS**：首屏主视觉图片显式标记 `fetchpriority="high"`（**严禁对首屏 LCP 图加 `loading="lazy"`**），所有媒体显式声明尺寸或 `aspect-ratio` 消除布局偏移（CLS），屏外图片/音视频按需懒加载。
+  - **INP 与后台节流**：避免滚动期间做同步重排（可延后至 `scrollend`），长计算分片让出主线程（如 `scheduler.yield()`），组件离屏或标签页后台时暂停 `<canvas>` / WebGL / 高频轮询。
+  - **子资源与 DOM 安全**：外部 CDN 脚本/样式必带 `integrity`（SRI）与 `crossorigin="anonymous"`；渲染不可信 HTML 必须经标准 Sanitizer 或 Trusted Types 过滤，严禁裸写 `innerHTML`。
+
+---
+
+## 6. 评审与手术调校四动词
 
 评审时先输出一句 **独特性判词（Specificity Verdict）**：“抽掉品牌名和文案，这套页面是专为此产品打造的，还是换个同类 Logo 也能套用？”随后按病因择一施治：
 
-- **提纯（Distill）**：砍多余边框、嵌套卡片、冗余色值和重复解释；Mode A 每屏收敛到 1 个核心动作，Mode B 移除遮挡主画布的冗余装饰。
+- **提纯（Distill）**：砍多余边框、嵌套卡片、冗余色值、重复解释与可用原生 HTML/CSS 替代的冗余 JS 胶水；Mode A 每屏收敛到 1 个核心动作，Mode B 移除遮挡主画布的装饰。
 - **降噪（Quieter）**：降低高饱和色彩与字重冲突、引入 tinted gray 与恰当呼吸留白，做“有观点的克制”，避免堕入白底灰字平庸风。
 - **强化（Bolder）**：不准新加颜色、新字体或花哨特效；只把当前系统已有最强母题、标题比例与对比节奏拉到极致，并通过 Skeleton Test。
-- **打磨（Polish）**：跨桌面/平板/手机（如 `1440 / 768 / 390`）实测长文案溢出、交互五态、对比度、光学校准与字体加载稳定性。
+- **打磨（Polish）**：跨桌面/平板/手机（如 `1440 / 768 / 390`）实测长文案溢出、交互五态、IME 回车安全、原生焦点管理、对比度、光学校准与字体加载稳定性。

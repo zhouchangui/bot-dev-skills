@@ -215,7 +215,7 @@ test('rendered skills are self-contained with zero leaked external skill referen
     claudeCopy: true,
   });
 
-  const forbidden = /\b(gstack|mattpocock|ponytail|grill-me|plan-eng-review|plan-design-review|design-review|design-consultation|to-spec|to-tickets|codebase-design|document-release|diagnosing-bugs|office-hours|TODOS\.md|taste-skill|impeccable|emil-design-eng|frontend-design|ui-ux-pro-max)\b/i;
+  const forbidden = /\b(gstack|mattpocock|ponytail|grill-me|plan-eng-review|plan-design-review|design-review|design-consultation|to-spec|to-tickets|codebase-design|document-release|diagnosing-bugs|office-hours|TODOS\.md|taste-skill|impeccable|emil-design-eng|frontend-design|ui-ux-pro-max|modern-web-guidance)\b/i;
   for (const out of result.outputs) {
     assert.equal(
       forbidden.test(out.content),
@@ -409,7 +409,7 @@ test('skills.sh distribution in skills/ is in sync with templates/ and self-cont
   }
 });
 
-test('workflow refinements: resume sniffing, review read-only repo access, One-way door, Touched Paths, and UI modes are rendered', () => {
+test('workflow refinements, 6 quality guardrails, and modern native Web rules are rendered', () => {
   const result = compileSkills({
     sourceDir: srcRoot,
     hosts: ['agents'],
@@ -417,9 +417,12 @@ test('workflow refinements: resume sniffing, review read-only repo access, One-w
 
   const auto = result.outputs.find((o) => o.relPath === '.agents/skills/bot-auto/SKILL.md');
   const plan = result.outputs.find((o) => o.relPath === '.agents/skills/bot-plan/SKILL.md');
+  const build = result.outputs.find((o) => o.relPath === '.agents/skills/bot-build/SKILL.md');
   const review = result.outputs.find((o) => o.relPath === '.agents/skills/bot-review/SKILL.md');
+  const verify = result.outputs.find((o) => o.relPath === '.agents/skills/bot-verify/SKILL.md');
   const uiCraft = result.outputs.find((o) => o.relPath === '.agents/skills/bot-auto/references/ui-craft.md');
 
+  // Workflow resilience & UI modes
   assert.match(auto.content, /断点续跑嗅探（Resume First）/);
   assert.match(auto.content, /Touched Paths/);
   assert.match(auto.content, /单装兜底/);
@@ -429,6 +432,27 @@ test('workflow refinements: resume sniffing, review read-only repo access, One-w
   assert.match(review.content, /不可逆变更保护（One-way door）/);
   assert.match(uiCraft.content, /Mode A: Marketing \/ Persuade/);
   assert.match(uiCraft.content, /Mode B: App \/ Workbench/);
+
+  // 6 Modification Quality Control Guardrails
+  assert.match(build.content, /as unknown as T/);
+  assert.match(build.content, /假默认值投毒/);
+  assert.match(build.content, /真实往返契约测试/);
+  assert.match(auto.content, /Test-Lock then Fix/);
+  assert.match(auto.content, /Surgical Fix Budget/);
+  assert.match(review.content, /热路径复杂度与 I\/O 放大/);
+  assert.match(verify.content, /Zero Net-New Warnings & Diff Hygiene/);
+
+  // Modern Web Platform native primitives & anti-legacy hacks
+  assert.match(uiCraft.content, /Baseline Widely Available/);
+  assert.match(uiCraft.content, /showModal\(\)/);
+  assert.match(uiCraft.content, /popovertarget/);
+  assert.match(uiCraft.content, /isComposing/);
+  assert.match(uiCraft.content, /:user-invalid/);
+  assert.match(uiCraft.content, /field-sizing: content/);
+  assert.match(uiCraft.content, /interpolate-size: allow-keywords/);
+  assert.match(uiCraft.content, /light-dark\(\)/);
+  assert.match(uiCraft.content, /fetchpriority="high"/);
+  assert.match(review.content, /现代原生 Web 反模式检查/);
 });
 
 test('checkSkills and CLI --check detect clean sync, outdated files, stale dirs, and auto-detect partial hosts', () => {
